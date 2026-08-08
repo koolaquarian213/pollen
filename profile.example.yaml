@@ -1,0 +1,77 @@
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Pollen Auto-Apply Profile (EXAMPLE — copy to profile.yaml and fill in)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# cp profile.example.yaml profile.yaml
+# Then edit profile.yaml with your real info.
+
+# ── Required ──
+first_name: "Your"
+last_name: "Name"
+email: "your.email@example.com"
+phone: "555-123-4567"
+resume_path: "./your_resume.pdf"
+
+# ── Optional ──
+linkedin: "https://www.linkedin.com/in/yourprofile/"
+website: ""
+cover_letter_path: ""
+location: "Your City, ST"
+city: "Your City"
+state: "ST"
+country: "United States"
+zip_code: "00000"
+
+# ── Education ──
+education_level: "Bachelor's Degree"
+school: "Your University"
+degree: "B.S."
+graduation_year: "2020"
+major: "Computer Science"
+
+# ── Work Experience ──
+current_company: "Your Company"
+current_title: "Product Manager"
+years_experience: "5"
+management_experience: "2"
+
+# ── Common Application Questions ──
+work_authorization: "Yes"
+visa_sponsorship: "Yes"
+salary_expectation: ""
+start_date: "Immediately"
+notice_period: "2 weeks"
+willing_to_relocate: "Yes"
+comfortable_remote: "Yes"
+how_did_you_hear: "Company website"
+
+# ── EEO / Demographics ──
+gender: ""
+race: ""
+veteran_status: "I am not a protected veteran"
+disability_status: "I do not wish to answer"
+
+# ── Custom Question Answers ──
+# Keys are fuzzy-matched against form question labels
+custom_answers:
+  "how did you hear about": "Company website"
+  "how did you first learn": "Company website"
+  "willing to relocate": "Yes"
+  "comfortable with travel": "Yes"
+  "years of product management": "5"
+  "experience with ai": "Yes"
+  "experience with ml": "Yes"
+  "highest level of education": "Bachelor's Degree"
+  "are you 18 years of age or older": "Yes"
+  "country": "United States"
+  "preferred name": ""
+  "legal name": ""
+  "currently or have you ever been employed": "I have never been employed"
+  "former employee": "I have never been employed"
+  "nda": "Yes"
+  "privacy": "Yes"
+  "acknowledge": "Yes"
+  "hispanic": "No"
+  "in-person": "Yes"
+  "hybrid": "Yes"
+  "on-site": "Yes"
+  "security clearance": "No"
