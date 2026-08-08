@@ -1,0 +1,993 @@
+{
+  "jobs_scanned": 200,
+  "errors": 0,
+  "coverage_pct": 59.6,
+  "required_covered": 56,
+  "required_missing": 38,
+  "unanswered_fields": [
+    {
+      "label": "HISTORY WITH ANDURIL",
+      "count": 83,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "CONFLICT OF INTEREST",
+      "count": 78,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "CLEARANCE ELIGIBILITY - This position requires eligibility to obtain and maintain a U.S. security cl",
+      "count": 58,
+      "suggestion": "Add current_title"
+    },
+    {
+      "label": "If you have held a U.S. security clearance in the past, what clearance level have you held?",
+      "count": 50,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "Most Recent Employer",
+      "count": 7,
+      "suggestion": "Add current_company"
+    },
+    {
+      "label": "Salary Expectation",
+      "count": 7,
+      "suggestion": "Add salary_expectation"
+    },
+    {
+      "label": "Please list all countries of which you are a citizen, and, if applicable, the date you obtained citi",
+      "count": 7,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "Please list any additional countries of which you are a lawful permanent resident and, if applicable",
+      "count": 7,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "Preferred Name",
+      "count": 6,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "Have you been employed with The Trade Desk?",
+      "count": 6,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "Please review Form CC-305 at the link above before checking one of the boxes below.",
+      "count": 6,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "AUSTRALIAN CLEARANCE ELIGIBILITY - This position requires eligibility to obtain and maintain an Aust",
+      "count": 3,
+      "suggestion": "Add current_title"
+    },
+    {
+      "label": "Do you presently have an NV2 clearance, or are you eligible to obtain and maintain an NV2 clearance?",
+      "count": 3,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "At the time of application, are you 18+ years of age? Please selectYes No",
+      "count": 3,
+      "suggestion": "Add years_experience"
+    },
+    {
+      "label": "Are you highly proficient in Jira and Google Suite, and have you used these tools to manage program ",
+      "count": 2,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "Can you describe your experience managing security-related programs or working directly with Product",
+      "count": 2,
+      "suggestion": "Add years_experience"
+    },
+    {
+      "label": "What is the name of your current or previous employer?",
+      "count": 2,
+      "suggestion": "Add current_company"
+    },
+    {
+      "label": "Do you currently hold an active U.S. Security clearance?",
+      "count": 2,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "U.K. CLEARANCE ELIGIBILITY - This position requires eligibility to obtain and maintain an U.K. secur",
+      "count": 2,
+      "suggestion": "Add current_title"
+    },
+    {
+      "label": "What are the industries that you are currently supporting?",
+      "count": 1,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "\u96fb\u5b50\u30e1\u30fc\u30eb",
+      "count": 1,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "\u96fb\u8a71",
+      "count": 1,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "(Required if you answered 'yes' to \"have you been employed with The Trade Desk?\") What was your TTD ",
+      "count": 1,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "(Required if you answered 'yes' to \"have you been employed with The Trade Desk?\") Who was your manag",
+      "count": 1,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "Do you currently possess and are able to maintain an active US Top Secret Clearance?",
+      "count": 1,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "Are you willing to commute to Washington DC 5 days per week?",
+      "count": 1,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "DO you currently have an active US Top Secret Clearance?",
+      "count": 1,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "CLEARANCE ELIGIBILITY - Do you presently hold an active U.S. security clearance?",
+      "count": 1,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "Do you currently posses and are able to maintain an active US Top Secret Security Clearance?",
+      "count": 1,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "Are you willing and able to commute to Costa Mesa, CA 5 days a week?",
+      "count": 1,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "Are you able to be on-site 5 days a week in McHenry, MS?",
+      "count": 1,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "Do you have experience working with energetics (e.g., explosives, propellants, pyrotechnics, or rela",
+      "count": 1,
+      "suggestion": "Add years_experience"
+    },
+    {
+      "label": "Have you worked on rocket motor systems or energetics projects ranging from prototype development to",
+      "count": 1,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "Do you have experience taking a product from New Product Introduction (NPI) to full-rate production?",
+      "count": 1,
+      "suggestion": "Add years_experience"
+    },
+    {
+      "label": "Cumulative GPA",
+      "count": 1,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "When will you be available to work as a full-time, permanent employee? Full-time means working 40 ho",
+      "count": 1,
+      "suggestion": "Add to custom_answers"
+    },
+    {
+      "label": "How did you first hear about this role? Please selectRoblox Careers Site Roblox Early Career Newslet",
+      "count": 1,
+      "suggestion": "Add current_title"
+    },
+    {
+      "label": "This role will be crucial to furthering Roblox commitment to connect a billion people with optimism ",
+      "count": 1,
+      "suggestion": "Add current_title"
+    }
+  ],
+  "answered_fields": [
+    {
+      "label": "First Name",
+      "count": 182
+    },
+    {
+      "label": "Last Name",
+      "count": 182
+    },
+    {
+      "label": "Email",
+      "count": 182
+    },
+    {
+      "label": "Phone",
+      "count": 133
+    },
+    {
+      "label": "How did you hear about Anduril?",
+      "count": 90
+    },
+    {
+      "label": "Have you ever been employed by Anduril or any company that Anduril has acquired?",
+      "count": 83
+    },
+    {
+      "label": "EXPORT CONTROLS - This position requires access to information and technology that is subject to U.S",
+      "count": 78
+    },
+    {
+      "label": "U.S. WORK AUTHORIZATION",
+      "count": 78
+    },
+    {
+      "label": "Will you require sponsorship from Anduril for employment now or in the future (e.g, H1B visa)?",
+      "count": 78
+    },
+    {
+      "label": "Country",
+      "count": 60
+    },
+    {
+      "label": "job_application[location]",
+      "count": 46
+    },
+    {
+      "label": "Please provide your full legal name as it appears on your government ID To ensure accuracy of our ca",
+      "count": 42
+    },
+    {
+      "label": "Please Review the NDA and indicate your agreement by typing your full name below NONDISCLOSURE AGREE",
+      "count": 16
+    },
+    {
+      "label": "Are you currently or have you ever been employed by Rubrik or contracted to provide services to Rubr",
+      "count": 16
+    },
+    {
+      "label": "I acknowledge that I have read Rubrik\u2019s Candidate Privacy Notice and understand that the information",
+      "count": 16
+    },
+    {
+      "label": "What is the name of your current employer? Please share the name of the company or N/A if currently ",
+      "count": 15
+    },
+    {
+      "label": "What is your current job title?",
+      "count": 7
+    },
+    {
+      "label": "Will you now or in the future require immigration sponsorship for employment visa status?",
+      "count": 7
+    },
+    {
+      "label": "Are you legally authorized to work in the country you are applying to?",
+      "count": 7
+    },
+    {
+      "label": "Most Recent Job Title",
+      "count": 7
+    },
+    {
+      "label": "I confirm, that I have read the Celonis Privacy Notice for the handling of my personal data in the a",
+      "count": 7
+    },
+    {
+      "label": "I confirm the information provided in this application, including but not limited to my resume and t",
+      "count": 7
+    },
+    {
+      "label": "What is the country of your birth?",
+      "count": 7
+    },
+    {
+      "label": "Are you eligible to work in the country you are applying?",
+      "count": 6
+    },
+    {
+      "label": "Will you need a visa sponsorship?",
+      "count": 6
+    },
+    {
+      "label": "Are you at least 18 years old?",
+      "count": 6
+    },
+    {
+      "label": "How did you hear about The Trade Desk?",
+      "count": 6
+    },
+    {
+      "label": "Indicate Gender:",
+      "count": 6
+    },
+    {
+      "label": "Indicate Ethnic group:",
+      "count": 6
+    },
+    {
+      "label": "Indicate your Race:",
+      "count": 6
+    },
+    {
+      "label": "If you believe you belong to any of the categories of protected Veterans, please indicate by checkin",
+      "count": 6
+    },
+    {
+      "label": "How did you hear about this job? Please selectCompany Website LinkedIn Glassdoor Indeed We Work Remo",
+      "count": 5
+    },
+    {
+      "label": "Are you open to relocation?",
+      "count": 5
+    },
+    {
+      "label": "LinkedIn Profile",
+      "count": 4
+    },
+    {
+      "label": "What is your home Zip Code?",
+      "count": 4
+    },
+    {
+      "label": "What is your Legal Name?",
+      "count": 3
+    },
+    {
+      "label": "AUSTRALIAN WORK AUTHORIZATION",
+      "count": 3
+    },
+    {
+      "label": "Legal Name",
+      "count": 3
+    },
+    {
+      "label": "Are you legally authorized to work in the US? -- Yes No",
+      "count": 3
+    },
+    {
+      "label": "Will you now or in the future require sponsorship for work authorization? -- Yes No",
+      "count": 3
+    },
+    {
+      "label": "Please review and acknowledge Roblox's Job Applicant Privacy Notice Roblox Job Applicant Privacy Not",
+      "count": 3
+    },
+    {
+      "label": "Location",
+      "count": 2
+    },
+    {
+      "label": "This role must be performed from within Spain \u2014 remote work from outside Spain is not permitted. Do ",
+      "count": 2
+    },
+    {
+      "label": "U.K. WORK AUTHORIZATION - Anduril has a legal responsibility to ensure that all its employees have t",
+      "count": 2
+    },
+    {
+      "label": "How many years of presales experience do you have?",
+      "count": 1
+    },
+    {
+      "label": "We cannot hire a remote worker for this role. Are you based in Madrid (or relocating to Madrid) and ",
+      "count": 1
+    },
+    {
+      "label": "We cannot hire a remote worker for this role. Are you based in Munich (or relocating to Munich) and ",
+      "count": 1
+    },
+    {
+      "label": "We cannot hire a remote worker for this role. Are you based in Los Angeles and happy to work in the ",
+      "count": 1
+    },
+    {
+      "label": "Gender",
+      "count": 1
+    },
+    {
+      "label": "Are you Hispanic/Latino?",
+      "count": 1
+    },
+    {
+      "label": "Veteran Status",
+      "count": 1
+    },
+    {
+      "label": "Disability Status",
+      "count": 1
+    },
+    {
+      "label": "Do you confirm that you've been in your current role at Anduril for 9 Months?",
+      "count": 1
+    },
+    {
+      "label": "Preferred First Name",
+      "count": 1
+    },
+    {
+      "label": "You must complete this section accurately and have access to your .edu (or .ca or .mx) email address",
+      "count": 1
+    },
+    {
+      "label": "If you indicated \u201cYes\u201d to the previous question, what visa type would you require to start in this r",
+      "count": 1
+    }
+  ],
+  "all_fields_by_freq": [
+    {
+      "label": "LinkedIn Profile",
+      "count": 187,
+      "required": true
+    },
+    {
+      "label": "Attach",
+      "count": 185,
+      "required": false
+    },
+    {
+      "label": "First Name",
+      "count": 182,
+      "required": true
+    },
+    {
+      "label": "Last Name",
+      "count": 182,
+      "required": true
+    },
+    {
+      "label": "Email",
+      "count": 182,
+      "required": true
+    },
+    {
+      "label": "Phone",
+      "count": 182,
+      "required": true
+    },
+    {
+      "label": "Website",
+      "count": 175,
+      "required": false
+    },
+    {
+      "label": "file",
+      "count": 166,
+      "required": false
+    },
+    {
+      "label": "Country",
+      "count": 96,
+      "required": true
+    },
+    {
+      "label": "Gender",
+      "count": 91,
+      "required": true
+    },
+    {
+      "label": "Are you Hispanic/Latino?",
+      "count": 91,
+      "required": true
+    },
+    {
+      "label": "Veteran Status",
+      "count": 91,
+      "required": true
+    },
+    {
+      "label": "Disability Status",
+      "count": 91,
+      "required": true
+    },
+    {
+      "label": "How did you hear about Anduril?",
+      "count": 90,
+      "required": true
+    },
+    {
+      "label": "If other, please specify",
+      "count": 90,
+      "required": false
+    },
+    {
+      "label": "HISTORY WITH ANDURIL",
+      "count": 83,
+      "required": true
+    },
+    {
+      "label": "Have you ever been employed by Anduril or any company that Anduril has acquired?",
+      "count": 83,
+      "required": true
+    },
+    {
+      "label": "EXPORT CONTROLS - This position requires access to information and technology that is subject to U.S",
+      "count": 78,
+      "required": true
+    },
+    {
+      "label": "U.S. WORK AUTHORIZATION",
+      "count": 78,
+      "required": true
+    },
+    {
+      "label": "Will you require sponsorship from Anduril for employment now or in the future (e.g, H1B visa)?",
+      "count": 78,
+      "required": true
+    },
+    {
+      "label": "CONFLICT OF INTEREST",
+      "count": 78,
+      "required": true
+    },
+    {
+      "label": "CLEARANCE ELIGIBILITY - This position requires eligibility to obtain and maintain a U.S. security cl",
+      "count": 58,
+      "required": true
+    },
+    {
+      "label": "job_application[location]",
+      "count": 52,
+      "required": true
+    },
+    {
+      "label": "If you have held a U.S. security clearance in the past, what clearance level have you held?",
+      "count": 50,
+      "required": true
+    },
+    {
+      "label": "Please provide your full legal name as it appears on your government ID To ensure accuracy of our ca",
+      "count": 42,
+      "required": true
+    },
+    {
+      "label": "If yes, please provide your LDAP.",
+      "count": 41,
+      "required": false
+    },
+    {
+      "label": "Preferred First Name",
+      "count": 18,
+      "required": true
+    },
+    {
+      "label": "Please Review the NDA and indicate your agreement by typing your full name below NONDISCLOSURE AGREE",
+      "count": 16,
+      "required": true
+    },
+    {
+      "label": "Are you currently or have you ever been employed by Rubrik or contracted to provide services to Rubr",
+      "count": 16,
+      "required": true
+    },
+    {
+      "label": "I acknowledge that I have read Rubrik\u2019s Candidate Privacy Notice and understand that the information",
+      "count": 16,
+      "required": true
+    },
+    {
+      "label": "What is the name of your current employer? Please share the name of the company or N/A if currently ",
+      "count": 15,
+      "required": true
+    },
+    {
+      "label": "What is your current job title?",
+      "count": 7,
+      "required": true
+    },
+    {
+      "label": "Will you now or in the future require immigration sponsorship for employment visa status?",
+      "count": 7,
+      "required": true
+    },
+    {
+      "label": "Are you legally authorized to work in the country you are applying to?",
+      "count": 7,
+      "required": true
+    },
+    {
+      "label": "Most Recent Job Title",
+      "count": 7,
+      "required": true
+    },
+    {
+      "label": "Most Recent Employer",
+      "count": 7,
+      "required": true
+    },
+    {
+      "label": "Salary Expectation",
+      "count": 7,
+      "required": true
+    },
+    {
+      "label": "Preferred Start Date",
+      "count": 7,
+      "required": false
+    },
+    {
+      "label": "How did you hear about this job?",
+      "count": 7,
+      "required": false
+    },
+    {
+      "label": "I confirm, that I have read the Celonis Privacy Notice for the handling of my personal data in the a",
+      "count": 7,
+      "required": true
+    },
+    {
+      "label": "I confirm the information provided in this application, including but not limited to my resume and t",
+      "count": 7,
+      "required": true
+    },
+    {
+      "label": "What does \"The Best Team Wins\" mean to you?",
+      "count": 7,
+      "required": false
+    },
+    {
+      "label": "Search jobs",
+      "count": 7,
+      "required": false
+    },
+    {
+      "label": "What is the country of your birth?",
+      "count": 7,
+      "required": true
+    },
+    {
+      "label": "Please list all countries of which you are a citizen, and, if applicable, the date you obtained citi",
+      "count": 7,
+      "required": true
+    },
+    {
+      "label": "Please list any additional countries of which you are a lawful permanent resident and, if applicable",
+      "count": 7,
+      "required": true
+    },
+    {
+      "label": "Please indicate your gender identity",
+      "count": 6,
+      "required": false
+    },
+    {
+      "label": "Preferred Name",
+      "count": 6,
+      "required": true
+    },
+    {
+      "label": "Are you eligible to work in the country you are applying?",
+      "count": 6,
+      "required": true
+    },
+    {
+      "label": "Will you need a visa sponsorship?",
+      "count": 6,
+      "required": true
+    },
+    {
+      "label": "Are you at least 18 years old?",
+      "count": 6,
+      "required": true
+    },
+    {
+      "label": "Have you been employed with The Trade Desk?",
+      "count": 6,
+      "required": true
+    },
+    {
+      "label": "(Required if you answered 'yes' to \"have you been employed with The Trade Desk?\") What was your TTD ",
+      "count": 6,
+      "required": true
+    },
+    {
+      "label": "(Required if you answered 'yes' to \"have you been employed with The Trade Desk?\") Who was your manag",
+      "count": 6,
+      "required": true
+    },
+    {
+      "label": "How did you hear about The Trade Desk?",
+      "count": 6,
+      "required": true
+    },
+    {
+      "label": "Are you open to relocation?",
+      "count": 6,
+      "required": true
+    },
+    {
+      "label": "Indicate Gender:",
+      "count": 6,
+      "required": true
+    },
+    {
+      "label": "Indicate Ethnic group:",
+      "count": 6,
+      "required": true
+    },
+    {
+      "label": "Indicate your Race:",
+      "count": 6,
+      "required": true
+    },
+    {
+      "label": "If you believe you belong to any of the categories of protected Veterans, please indicate by checkin",
+      "count": 6,
+      "required": true
+    },
+    {
+      "label": "Please review Form CC-305 at the link above before checking one of the boxes below.",
+      "count": 6,
+      "required": true
+    },
+    {
+      "label": "How did you hear about this job? Please selectCompany Website LinkedIn Glassdoor Indeed We Work Remo",
+      "count": 5,
+      "required": true
+    },
+    {
+      "label": "School",
+      "count": 4,
+      "required": false
+    },
+    {
+      "label": "Degree",
+      "count": 4,
+      "required": false
+    },
+    {
+      "label": "What is your home Zip Code?",
+      "count": 4,
+      "required": true
+    },
+    {
+      "label": "Discipline",
+      "count": 3,
+      "required": false
+    },
+    {
+      "label": "What is your Legal Name?",
+      "count": 3,
+      "required": true
+    },
+    {
+      "label": "AUSTRALIAN CLEARANCE ELIGIBILITY - This position requires eligibility to obtain and maintain an Aust",
+      "count": 3,
+      "required": true
+    },
+    {
+      "label": "Do you presently have an NV2 clearance, or are you eligible to obtain and maintain an NV2 clearance?",
+      "count": 3,
+      "required": true
+    },
+    {
+      "label": "AUSTRALIAN WORK AUTHORIZATION",
+      "count": 3,
+      "required": true
+    },
+    {
+      "label": "Legal Name",
+      "count": 3,
+      "required": true
+    },
+    {
+      "label": "At the time of application, are you 18+ years of age? Please selectYes No",
+      "count": 3,
+      "required": true
+    },
+    {
+      "label": "Are you legally authorized to work in the US? -- Yes No",
+      "count": 3,
+      "required": true
+    },
+    {
+      "label": "Will you now or in the future require sponsorship for work authorization? -- Yes No",
+      "count": 3,
+      "required": true
+    },
+    {
+      "label": "Please review and acknowledge Roblox's Job Applicant Privacy Notice Roblox Job Applicant Privacy Not",
+      "count": 3,
+      "required": true
+    },
+    {
+      "label": "Location",
+      "count": 2,
+      "required": true
+    },
+    {
+      "label": "This role must be performed from within Spain \u2014 remote work from outside Spain is not permitted. Do ",
+      "count": 2,
+      "required": true
+    },
+    {
+      "label": "Are you highly proficient in Jira and Google Suite, and have you used these tools to manage program ",
+      "count": 2,
+      "required": true
+    },
+    {
+      "label": "Can you describe your experience managing security-related programs or working directly with Product",
+      "count": 2,
+      "required": true
+    },
+    {
+      "label": "\u6dfb\u4ed8",
+      "count": 2,
+      "required": false
+    },
+    {
+      "label": "What is the name of your current or previous employer?",
+      "count": 2,
+      "required": true
+    },
+    {
+      "label": "Do you currently hold an active U.S. Security clearance?",
+      "count": 2,
+      "required": true
+    },
+    {
+      "label": "U.K. CLEARANCE ELIGIBILITY - This position requires eligibility to obtain and maintain an U.K. secur",
+      "count": 2,
+      "required": true
+    },
+    {
+      "label": "U.K. WORK AUTHORIZATION - Anduril has a legal responsibility to ensure that all its employees have t",
+      "count": 2,
+      "required": true
+    },
+    {
+      "label": "LinkedIn URL",
+      "count": 2,
+      "required": false
+    },
+    {
+      "label": "What are the industries that you are currently supporting?",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "How many years of presales experience do you have?",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "We cannot hire a remote worker for this role. Are you based in Madrid (or relocating to Madrid) and ",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "We cannot hire a remote worker for this role. Are you based in Munich (or relocating to Munich) and ",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "\u96fb\u5b50\u30e1\u30fc\u30eb",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "\u96fb\u8a71",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "We cannot hire a remote worker for this role. Are you based in Los Angeles and happy to work in the ",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "Do you confirm that you've been in your current role at Anduril for 9 Months?",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "Do you currently possess and are able to maintain an active US Top Secret Clearance?",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "Are you willing to commute to Washington DC 5 days per week?",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "DO you currently have an active US Top Secret Clearance?",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "CLEARANCE ELIGIBILITY - Do you presently hold an active U.S. security clearance?",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "Do you currently posses and are able to maintain an active US Top Secret Security Clearance?",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "Are you willing and able to commute to Costa Mesa, CA 5 days a week?",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "Are you able to be on-site 5 days a week in McHenry, MS?",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "Do you have experience working with energetics (e.g., explosives, propellants, pyrotechnics, or rela",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "If yes, please describe your experience, including the types of projects, materials, or systems you ",
+      "count": 1,
+      "required": false
+    },
+    {
+      "label": "Have you worked on rocket motor systems or energetics projects ranging from prototype development to",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "If yes, please provide details about the size of the systems, the scope of the projects (e.g., R&D, ",
+      "count": 1,
+      "required": false
+    },
+    {
+      "label": "Do you have experience taking a product from New Product Introduction (NPI) to full-rate production?",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "If yes, please describe your role and how you addressed challenges such as scaling production, proce",
+      "count": 1,
+      "required": false
+    },
+    {
+      "label": "You must complete this section accurately and have access to your .edu (or .ca or .mx) email address",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "Cumulative GPA",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "When will you be available to work as a full-time, permanent employee? Full-time means working 40 ho",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "If you indicated \u201cYes\u201d to the previous question, what visa type would you require to start in this r",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "Roblox Username",
+      "count": 1,
+      "required": false
+    },
+    {
+      "label": "How did you first hear about this role? Please selectRoblox Careers Site Roblox Early Career Newslet",
+      "count": 1,
+      "required": true
+    },
+    {
+      "label": "This role will be crucial to furthering Roblox commitment to connect a billion people with optimism ",
+      "count": 1,
+      "required": true
+    }
+  ],
+  "errors_detail": []
+}

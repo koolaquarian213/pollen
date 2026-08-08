@@ -1,0 +1,1680 @@
+From 5f309f105c7d50f65e53be3c175bd8240f1d6c1c Mon Sep 17 00:00:00 2001
+From: Pollen Bot <pollen@users.noreply.github.com>
+Date: Sat, 8 Aug 2026 21:38:34 +0000
+Subject: [PATCH] Scale: add pipeline, scoring, direct-DB auto-apply, alert
+ plumbing, schema migration
+
+- Fix schema: add resume_match_score, resume_match_details, visa_sponsorship, job_score to Job model
+- Add utils/resume_matcher.py: transparent relevance scoring (0-100) + visa sponsorship detection
+- Wire up alert plumbing: orchestrator returns new jobs, scheduler calls check_and_send_alerts
+- Add direct-DB mode to auto_apply.py (--use-db flag, no API server needed)
+- Add --headless, --min-score, --source flags to auto_apply.py
+- Create run_pipeline.py: 4 modes (crawl, rank, dry-apply, apply)
+- Rewrite run_scheduler.py to use pipeline with configurable modes/intervals
+- Add /api/jobs/ranked endpoint + job_score to API response
+- Add db/migrate.py for adding new columns to existing databases
+- Auto-run migration from init_db()
+- Fix requirements.txt: add asyncpg, aiohttp
+- Privacy: rename profile.yaml to profile.example.yaml, add to .gitignore
+- Add SCALING.md runbook
+---
+ .gitignore                           |   1 +
+ SCALING.md                           | 235 +++++++++++++++++++++
+ api/server.py                        |  45 ++++
+ auto_apply.py                        | 176 +++++++++++-----
+ db/migrate.py                        |  81 ++++++++
+ db/models.py                         |   6 +
+ db/session.py                        |  10 +-
+ profile.yaml => profile.example.yaml |  61 +++---
+ requirements.txt                     |   2 +
+ run_pipeline.py                      | 268 ++++++++++++++++++++++++
+ run_scheduler.py                     | 118 ++++++++---
+ scrapers/orchestrator.py             |  37 +++-
+ utils/resume_matcher.py              | 300 +++++++++++++++++++++++++++
+ 13 files changed, 1217 insertions(+), 123 deletions(-)
+ create mode 100644 SCALING.md
+ create mode 100644 db/migrate.py
+ rename profile.yaml => profile.example.yaml (57%)
+ create mode 100644 run_pipeline.py
+ create mode 100644 utils/resume_matcher.py
+
+diff --git a/.gitignore b/.gitignore
+index e0c24e5..52d0e2a 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -11,3 +11,4 @@ node_modules/
+ venv/
+ .venv/
+ *.db-journal
++profile.yaml
+diff --git a/SCALING.md b/SCALING.md
+new file mode 100644
+index 0000000..f2e7d5c
+--- /dev/null
++++ b/SCALING.md
+@@ -0,0 +1,235 @@
++# 🌸 Pollen — Scaling Guide
++
++This guide covers the three scaling areas: **scheduling & alerts**, **smarter search**, and **auto-apply**.
++
++---
++
++## Quick Start (New Pipeline)
++
++The main entry point is now `run_pipeline.py`:
++
++```bash
++# One-time: migrate existing database to new schema
++python -m db.migrate
++
++# Crawl + score only (safest — no status changes)
++python run_pipeline.py --mode crawl
++
++# Crawl + score + auto-mark high-scoring jobs as saved (recommended)
++python run_pipeline.py --mode rank --min-score 30
++
++# Crawl + score + mark saved + dry-run auto-apply (fills forms, no submit)
++python run_pipeline.py --mode dry-apply --profile profile.yaml
++
++# Full pipeline — crawl + score + mark saved + submit applications
++python run_pipeline.py --mode apply --profile profile.yaml --limit 20
++```
++
++---
++
++## 1. Scheduling & Alerts
++
++### How it works
++
++The scheduler runs the pipeline on a configurable interval. After each crawl:
++1. New jobs are scored (relevance + visa detection)
++2. High-scoring **Greenhouse** jobs are auto-marked as `saved` (auto-apply currently supports Greenhouse only)
++3. Alerts are sent for new jobs matching your saved searches
++
++### Running the scheduler
++
++```bash
++# Default: rank mode every 6 hours
++python run_scheduler.py
++
++# Custom interval and mode
++python run_scheduler.py --mode rank --interval 12 --min-score 40
++
++# Full auto-apply on a schedule (use with caution)
++python run_scheduler.py --mode apply --limit 10 --interval 24
++```
++
++### Configuring alerts
++
++Alerts use the existing `utils/alerts.py` system. Set up in `.env`:
++
++```bash
++# Slack alerts (easiest)
++SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
++
++# Email alerts
++SMTP_HOST=smtp.gmail.com
++SMTP_PORT=587
++SMTP_USER=your.email@gmail.com
++SMTP_PASSWORD=your-app-password
++ALERT_EMAIL=your.email@gmail.com
++```
++
++Then create saved searches via the API:
++
++```bash
++# Start the API server
++uvicorn api.server:app --port 8000
++
++# Create a saved search with alerts
++curl -X POST http://localhost:8000/api/saved-searches \
++  -H "Content-Type: application/json" \
++  -d '{
++    "name": "AI PM roles",
++    "query": "product manager",
++    "filters": {"remote": true},
++    "alerts_enabled": true,
++    "alert_channels": ["email", "slack"]
++  }'
++```
++
++---
++
++## 2. Smarter Search
++
++### Relevance scoring
++
++Every job gets a `job_score` (0-100) based on:
++
++| Factor | Points | Example |
++|--------|--------|---------|
++| Title keyword match | +25 to +35 | "Senior Product Manager" = +30 |
++| Tag match (AI/ML, GenAI, Platform) | +10 to +15 each (cap 30) | AI/ML tag = +15 |
++| Seniority alignment | +15 | IC5 (Senior) = +15 |
++| Remote | +5 | |
++| Salary >= $150k | +5 | |
++| Visa sponsorship detected | +10 | |
++| Defense/clearance keywords | -40 to -50 | "defense", "Lockheed" |
++| Junior/entry-level | -10 to -20 | |
++
++### Scoring jobs
++
++```bash
++# Score all unscored jobs
++curl -X POST http://localhost:8000/api/resume/match
++
++# Or via Python directly
++python -c "
++import asyncio
++from utils.resume_matcher import run_batch_matching
++asyncio.run(run_batch_matching(limit=500, force=False))
++"
++```
++
++### Visa sponsorship detection
++
++```bash
++# Scan all job descriptions for visa info
++curl -X POST http://localhost:8000/api/resume/visa-scan
++```
++
++This sets `visa_sponsorship` to `yes`, `no`, or `unknown` on each job by scanning the description text.
++
++### Ranked search endpoint
++
++```bash
++# Get top jobs by score
++curl http://localhost:8000/api/jobs/ranked?min_score=50&limit=20
++
++# Filter by source and status
++curl http://localhost:8000/api/jobs/ranked?source=greenhouse&status=new&min_score=30
++```
++
++---
++
++## 3. Auto-Apply
++
++### Direct DB mode (no API server needed)
++
++The auto-apply now supports querying jobs directly from the database:
++
++```bash
++# Apply using direct DB access (recommended — no API server needed)
++python auto_apply.py --profile profile.yaml --use-db --auto-only --limit 20
++
++# Only apply to jobs scoring above 50
++python auto_apply.py --profile profile.yaml --use-db --auto-only --min-score 50 --limit 20
++
++# Dry run (fill forms, take screenshots, don't submit)
++python auto_apply.py --profile profile.yaml --use-db --dry-run --limit 5
++
++# Run headless (for production/scheduled runs)
++python auto_apply.py --profile profile.yaml --use-db --headless --auto-only --limit 50
++```
++
++### Via the pipeline
++
++```bash
++# Dry-run apply (fills forms, takes screenshots, no submit)
++python run_pipeline.py --mode dry-apply --profile profile.yaml
++
++# Full auto-apply (submits applications)
++python run_pipeline.py --mode apply --profile profile.yaml --limit 20
++```
++
++### Form scanning (find gaps in your profile)
++
++Before bulk-applying, scan forms to find what custom questions you're missing:
++
++```bash
++python scan_forms.py --profile profile.yaml --status saved --limit 20
++```
++
++This generates a report showing:
++- Which required fields your profile can answer
++- Which required fields are missing (with suggestions)
++- A ready-to-paste `custom_answers` block for your `profile.yaml`
++
++---
++
++## Pipeline Modes Reference
++
++| Mode | Crawl | Score | Auto-save | Auto-apply | Safe? |
++|------|-------|-------|-----------|------------|-------|
++| `crawl` | ✓ | ✓ | — | — | ✓ Always |
++| `rank` | ✓ | ✓ | ✓ | — | ✓ Recommended |
++| `dry-apply` | ✓ | ✓ | ✓ | Fill only | ✓ Safe |
++| `apply` | ✓ | ✓ | ✓ | Submit | ⚠ Irreversible |
++
++---
++
++## Environment Variables
++
++| Variable | Default | Description |
++|----------|---------|-------------|
++| `PIPELINE_MODE` | `rank` | Pipeline mode (crawl, rank, dry-apply, apply) |
++| `PIPELINE_MIN_SCORE` | `30` | Minimum score to auto-mark as saved |
++| `PIPELINE_APPLY_LIMIT` | `50` | Max applications per run |
++| `PIPELINE_SOURCES` | (all) | Comma-separated sources to crawl |
++| `CRAWL_INTERVAL_HOURS` | `6` | Hours between scheduled runs |
++| `ANTHROPIC_API_KEY` | — | For LLM-powered website scraping |
++| `SLACK_WEBHOOK_URL` | — | For Slack alerts |
++| `SMTP_HOST` | — | For email alerts |
++
++---
++
++## Privacy Note
++
++Your `profile.yaml` contains personal information (name, email, phone, resume path).
++It is now in `.gitignore` and removed from git tracking.
++
++**Important:** If you previously committed `profile.yaml` to a public GitHub repo,
++your personal data is still in the git history. To scrub it:
++
++```bash
++# Option 1: Use git filter-repo (recommended)
++pip install git-filter-repo
++git filter-repo --invert-paths --path profile.yaml
++
++git push origin --force --all
++
++# Option 2: Use BFG Repo-Cleaner
++bfg --delete-files profile.yaml
++git reflog expire --expire=now --all
++git gc --prune=now --aggressive
++
++git push origin --force --all
++```
++
++After scrubbing, anyone who already cloned the repo still has your data locally.
++Consider rotating any exposed credentials.
+diff --git a/api/server.py b/api/server.py
+index 393a5b5..40cb308 100644
+--- a/api/server.py
++++ b/api/server.py
+@@ -64,9 +64,11 @@ class JobResponse(BaseModel):
+     source: str
+     status: str = "new"
+     bookmarked: bool = False
++    notes: Optional[str] = None
+     resume_match_score: Optional[int] = None
+     resume_match_details: Optional[str] = None
+     visa_sponsorship: Optional[str] = "unknown"
++    job_score: Optional[int] = None
+     date_posted: Optional[datetime] = None
+     first_seen_at: datetime
+     last_seen_at: datetime
+@@ -154,6 +156,49 @@ async def list_jobs(
+     )
+ 
+ 
++@app.get("/api/jobs/ranked", response_model=JobListResponse)
++async def ranked_jobs(
++    status: Optional[str] = Query(None),
++    source: Optional[str] = Query(None),
++    remote: Optional[bool] = Query(None),
++    min_score: int = Query(0, description="Minimum job_score (0-100)"),
++    limit: int = Query(50, le=200),
++    offset: int = Query(0),
++    session: AsyncSession = Depends(get_session),
++):
++    """Get jobs ranked by relevance score (highest first)."""
++    conditions = [Job.job_score >= min_score]
++
++    if status:
++        conditions.append(Job.status == status)
++    if source:
++        conditions.append(Job.source == source)
++    if remote is not None:
++        conditions.append(Job.remote == remote)
++
++    from sqlalchemy import and_
++    where = and_(*conditions) if conditions else True
++
++    count_stmt = select(func.count(Job.id)).where(where)
++    count_result = await session.execute(count_stmt)
++    total = count_result.scalar()
++
++    stmt = (
++        select(Job)
++        .where(where)
++        .order_by(Job.job_score.desc().nullslast(), Job.first_seen_at.desc())
++        .limit(limit)
++        .offset(offset)
++    )
++    result = await session.execute(stmt)
++    jobs = list(result.scalars().all())
++
++    return JobListResponse(
++        jobs=[JobResponse.model_validate(j) for j in jobs],
++        total=total, limit=limit, offset=offset,
++    )
++
++
+ @app.get("/api/jobs/{job_id}", response_model=JobResponse)
+ async def get_job(job_id: int, session: AsyncSession = Depends(get_session)):
+     """Get a single job by ID."""
+diff --git a/auto_apply.py b/auto_apply.py
+index b24d5ba..f482732 100644
+--- a/auto_apply.py
++++ b/auto_apply.py
+@@ -21,6 +21,7 @@ import json
+ import os
+ import time
+ import random
++from datetime import datetime, timezone
+ from pathlib import Path
+ from typing import Optional
+ 
+@@ -98,12 +99,13 @@ class ApplicantProfile:
+ class GreenhouseAutoApply:
+     """Automates Greenhouse job applications using Playwright."""
+ 
+-    def __init__(self, profile: ApplicantProfile, dry_run: bool = False, use_llm: bool = True, pause_on_missing: bool = False, auto_only: bool = False):
++    def __init__(self, profile: ApplicantProfile, dry_run: bool = False, use_llm: bool = True, pause_on_missing: bool = False, auto_only: bool = False, headless: bool = False):
+         self.profile = profile
+         self.dry_run = dry_run
+         self.use_llm = use_llm
+         self.pause_on_missing = pause_on_missing
+         self.auto_only = auto_only
++        self.headless = headless
+         self.browser = None
+         self.playwright = None
+         self.results = []
+@@ -114,7 +116,7 @@ class GreenhouseAutoApply:
+         from playwright.async_api import async_playwright
+         self.playwright = await async_playwright().start()
+         self.browser = await self.playwright.chromium.launch(
+-            headless=False,  # Set True for production, False to watch it work
++            headless=self.headless,  # True for production, False to watch it work
+             slow_mo=100,
+         )
+ 
+@@ -1162,25 +1164,23 @@ class GreenhouseAutoApply:
+         return url
+ 
+     async def _update_job_status(self, job_url: str, status: str):
+-        """Update job status in the database via API."""
++        """Update job status in the database (direct DB, no API needed)."""
+         try:
+-            import aiohttp
+-            # Find job ID by URL
+-            async with aiohttp.ClientSession() as session:
+-                async with session.get(f"http://localhost:8000/api/jobs?limit=200") as r:
+-                    if r.status == 200:
+-                        data = await r.json()
+-                        for job in data.get("jobs", []):
+-                            if job.get("url") == job_url:
+-                                async with session.post(
+-                                    f"http://localhost:8000/api/jobs/{job['id']}/status",
+-                                    json={"status": status}
+-                                ) as sr:
+-                                    if sr.status == 200:
+-                                        console.print(f"  [dim]✓ Status updated to '{status}'[/dim]")
+-                                return
+-        except Exception as e:
+-            # Fallback: update directly via SQLite
++            from db.session import async_session
++            from db.models import Job
++            from sqlalchemy import select, update as sql_update
++
++            async with async_session() as session:
++                stmt = sql_update(Job).where(Job.url == job_url).values(
++                    status=status,
++                    updated_at=datetime.now(timezone.utc),
++                )
++                result = await session.execute(stmt)
++                await session.commit()
++                if result.rowcount:
++                    console.print(f"  [dim]✓ Status updated to '{status}'[/dim]")
++        except Exception:
++            # Fallback: direct SQLite
+             try:
+                 import sqlite3
+                 conn = sqlite3.connect("jobs.db")
+@@ -1249,6 +1249,10 @@ async def main():
+     parser.add_argument("--pause", action="store_true", help="Pause on unfilled required fields so you can fill them manually")
+     parser.add_argument("--auto-only", action="store_true", help="Skip jobs that have required fields the profile can't fill")
+     parser.add_argument("--url", type=str, help="Apply to a specific job URL directly")
++    parser.add_argument("--source", default="greenhouse", help="Filter by source (default: greenhouse)")
++    parser.add_argument("--headless", action="store_true", help="Run browser headless (no visible window)")
++    parser.add_argument("--min-score", type=int, default=0, help="Only apply to jobs with job_score >= this (0-100)")
++    parser.add_argument("--use-db", action="store_true", help="Query jobs directly from DB instead of API server (recommended)")
+     args = parser.parse_args()
+ 
+     # Load profile
+@@ -1264,8 +1268,10 @@ async def main():
+     console.print(f"  Resume: {profile.resume_path}")
+     if args.dry_run:
+         console.print("  [yellow]Mode: DRY RUN (forms filled but not submitted)[/yellow]")
++    if args.use_db:
++        console.print("  [dim]Mode: Direct DB (no API server needed)[/dim]")
+ 
+-    applier = GreenhouseAutoApply(profile, dry_run=args.dry_run, pause_on_missing=args.pause, auto_only=args.auto_only)
++    applier = GreenhouseAutoApply(profile, dry_run=args.dry_run, pause_on_missing=args.pause, auto_only=args.auto_only, headless=args.headless)
+     await applier.start()
+ 
+     try:
+@@ -1273,42 +1279,22 @@ async def main():
+             # Apply to a specific URL
+             await applier.apply_to_job(args.url, "Direct", "Manual Application")
+         else:
+-            # Get jobs from database
+-            import aiohttp
+-            async with aiohttp.ClientSession() as session:
+-                params = {"source": "greenhouse", "status": args.status, "limit": args.limit}
+-                if args.job_id:
+-                    # Fetch specific job
+-                    async with session.get(f"http://localhost:8000/api/jobs/{args.job_id}") as r:
+-                        if r.status == 200:
+-                            job = await r.json()
+-                            await applier.apply_to_job(job["url"], job["company_name"], job["title"])
+-                        else:
+-                            console.print(f"[red]Job ID {args.job_id} not found[/red]")
+-                else:
+-                    # Fetch jobs by status
+-                    async with session.get(
+-                        f"http://localhost:8000/api/jobs",
+-                        params={"source": "greenhouse", "status": args.status, "limit": args.limit}
+-                    ) as r:
+-                        if r.status == 200:
+-                            data = await r.json()
+-                            jobs = data.get("jobs", [])
+-                            console.print(f"\n  Found {len(jobs)} '{args.status}' greenhouse jobs\n")
+-
+-                            for job in jobs:
+-                                await applier.apply_to_job(
+-                                    job["url"],
+-                                    job["company_name"],
+-                                    job["title"],
+-                                )
+-                                # Delay between applications
+-                                if not args.dry_run:
+-                                    delay = random.uniform(3, 8)
+-                                    console.print(f"  [dim]Waiting {delay:.0f}s...[/dim]")
+-                                    await asyncio.sleep(delay)
+-                        else:
+-                            console.print(f"[red]API error: {r.status}[/red]")
++            # Get jobs from database — direct DB mode or API mode
++            jobs = await _fetch_jobs(args)
++            if jobs:
++                console.print(f"\n  Found {len(jobs)} '{args.status}' {args.source} jobs\n")
++
++                for job in jobs:
++                    await applier.apply_to_job(
++                        job["url"], job["company_name"], job["title"],
++                    )
++                    # Delay between applications
++                    if not args.dry_run:
++                        delay = random.uniform(3, 8)
++                        console.print(f"  [dim]Waiting {delay:.0f}s...[/dim]")
++                        await asyncio.sleep(delay)
++            else:
++                console.print(f"[yellow]No jobs found with status='{args.status}' source='{args.source}'[/yellow]")
+ 
+     finally:
+         await applier.close()
+@@ -1316,5 +1302,81 @@ async def main():
+     applier.print_results()
+ 
+ 
++async def _fetch_jobs(args) -> list[dict]:
++    """Fetch jobs from DB directly or via API, depending on --use-db flag."""
++    if args.use_db:
++        return await _fetch_jobs_from_db(args)
++    else:
++        return await _fetch_jobs_from_api(args)
++
++
++async def _fetch_jobs_from_db(args) -> list[dict]:
++    """Query jobs directly from the database — no API server needed."""
++    from db.session import async_session, init_db
++    from db.models import Job
++    from sqlalchemy import select
++
++    await init_db()
++
++    async with async_session() as session:
++        stmt = select(Job).where(
++            Job.source == args.source,
++            Job.status == args.status,
++        )
++
++        if args.job_id:
++            stmt = stmt.where(Job.id == args.job_id)
++
++        if args.min_score > 0:
++            stmt = stmt.where(Job.job_score >= args.min_score)
++
++        stmt = stmt.order_by(
++            Job.job_score.desc().nullslast(),
++            Job.first_seen_at.desc(),
++        ).limit(args.limit)
++
++        result = await session.execute(stmt)
++        jobs = result.scalars().all()
++
++        return [
++            {
++                "id": j.id,
++                "url": j.url,
++                "title": j.title,
++                "company_name": j.company_name,
++                "location": j.location or "",
++                "remote": j.remote,
++                "job_score": j.job_score,
++            }
++            for j in jobs
++        ]
++
++
++async def _fetch_jobs_from_api(args) -> list[dict]:
++    """Fetch jobs via the API server (legacy mode, requires server running)."""
++    import aiohttp
++    async with aiohttp.ClientSession() as session:
++        if args.job_id:
++            async with session.get(f"http://localhost:8000/api/jobs/{args.job_id}") as r:
++                if r.status == 200:
++                    job = await r.json()
++                    return [job]
++                else:
++                    console.print(f"[red]Job ID {args.job_id} not found[/red]")
++                    return []
++        else:
++            async with session.get(
++                f"http://localhost:8000/api/jobs",
++                params={"source": args.source, "status": args.status, "limit": args.limit}
++            ) as r:
++                if r.status == 200:
++                    data = await r.json()
++                    return data.get("jobs", [])
++                else:
++                    console.print(f"[red]API error: {r.status}. Is the server running?[/red]")
++                    console.print("[dim]Tip: use --use-db to query the database directly without the API server[/dim]")
++                    return []
++
++
+ if __name__ == "__main__":
+     asyncio.run(main())
+diff --git a/db/migrate.py b/db/migrate.py
+new file mode 100644
+index 0000000..f28ad25
+--- /dev/null
++++ b/db/migrate.py
+@@ -0,0 +1,81 @@
++"""
++Database migration — add new columns to existing tables.
++
++This is needed because SQLAlchemy's create_all() only creates missing tables,
++not missing columns on existing tables. Run this once after updating to
++the new schema.
++
++Usage:
++    python -m db.migrate
++"""
++
++import asyncio
++from sqlalchemy import text, inspect
++from rich.console import Console
++
++from db.session import engine, async_session
++from db.models import Job
++
++console = Console()
++
++# Columns to add: (column_name, SQL type definition)
++NEW_COLUMNS = [
++    ("resume_match_score", "INTEGER"),
++    ("resume_match_details", "TEXT"),
++    ("visa_sponsorship", "VARCHAR(20) DEFAULT 'unknown'"),
++    ("job_score", "INTEGER"),
++    ("notes", "TEXT"),
++]
++
++
++async def get_existing_columns(table_name: str) -> list[str]:
++    """Get list of existing column names for a table."""
++    async with engine.connect() as conn:
++        def get_columns(sync_conn):
++            insp = inspect(sync_conn)
++            return [col["name"] for col in insp.get_columns(table_name)]
++        return await conn.run_sync(get_columns)
++
++
++async def migrate():
++    """Add missing columns to the jobs table."""
++    console.print("[bold]🌸 Pollen DB Migration[/bold]\n")
++
++    existing = await get_existing_columns("jobs")
++
++    if existing is None:
++        console.print("[red]Table 'jobs' does not exist. Run the app first to create tables.[/red]")
++        return
++
++    console.print(f"  Existing columns in 'jobs': {len(existing)}")
++
++    added = 0
++    async with engine.begin() as conn:
++        for col_name, col_type in NEW_COLUMNS:
++            if col_name not in existing:
++                console.print(f"  [yellow]Adding column: {col_name} ({col_type})[/yellow]")
++                await conn.execute(text(f"ALTER TABLE jobs ADD COLUMN {col_name} {col_type}"))
++                added += 1
++            else:
++                console.print(f"  [green]✓ Column already exists: {col_name}[/green]")
++
++    if added == 0:
++        console.print("\n[green]✓ Database is up to date. No migration needed.[/green]")
++    else:
++        console.print(f"\n[green]✓ Migration complete. Added {added} column(s).[/green]")
++
++    # Add indexes on new columns
++    async with engine.begin() as conn:
++        for col_name in ["job_score", "resume_match_score"]:
++            try:
++                index_name = f"ix_jobs_{col_name}"
++                await conn.execute(text(f"CREATE INDEX IF NOT EXISTS {index_name} ON jobs ({col_name})"))
++                console.print(f"  [dim]Index ensured: {index_name}[/dim]")
++            except Exception:
++                pass  # Index may already exist
++
++    console.print("\n[bold green]Done![/bold green]")
++
++
++if __name__ == "__main__":
++    asyncio.run(migrate())
+diff --git a/db/models.py b/db/models.py
+index d38a9a6..b7e7ad3 100644
+--- a/db/models.py
++++ b/db/models.py
+@@ -80,6 +80,12 @@ class Job(Base):
+     bookmarked: Mapped[bool] = mapped_column(Boolean, default=False)
+     notes: Mapped[Optional[str]] = mapped_column(Text)
+ 
++    # Resume matching / scoring (populated by utils/resume_matcher.py)
++    resume_match_score: Mapped[Optional[int]] = mapped_column(Integer, index=True)  # 0-100
++    resume_match_details: Mapped[Optional[str]] = mapped_column(Text)
++    visa_sponsorship: Mapped[Optional[str]] = mapped_column(String(20), default="unknown")  # yes/no/unknown
++    job_score: Mapped[Optional[int]] = mapped_column(Integer, index=True)  # lightweight relevance score 0-100
++
+     # Deduplication hash
+     dedup_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+ 
+diff --git a/db/session.py b/db/session.py
+index f0ab6b1..f467b6c 100644
+--- a/db/session.py
++++ b/db/session.py
+@@ -20,9 +20,17 @@ async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit
+ 
+ 
+ async def init_db():
+-    """Create all tables."""
++    """Create all tables and run migrations for new columns."""
+     async with engine.begin() as conn:
+         await conn.run_sync(Base.metadata.create_all)
++
++    # Auto-migrate: add new columns to existing tables
++    try:
++        from db.migrate import migrate
++        await migrate()
++    except Exception as e:
++        print(f"Migration warning (non-fatal): {e}")
++
+     print("✓ Database initialized")
+ 
+ 
+diff --git a/profile.yaml b/profile.example.yaml
+similarity index 57%
+rename from profile.yaml
+rename to profile.example.yaml
+index 01664ae..c091652 100644
+--- a/profile.yaml
++++ b/profile.example.yaml
+@@ -1,50 +1,52 @@
+ # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+-# Pollen Auto-Apply Profile
++# Pollen Auto-Apply Profile (EXAMPLE — copy to profile.yaml and fill in)
+ # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
++# cp profile.example.yaml profile.yaml
++# Then edit profile.yaml with your real info.
+ 
+ # ── Required ──
+-first_name: "Samson"
+-last_name: "Paturi"
+-email: "swaroop.samson@gmail.com"
+-phone: "646-881-5553"
+-resume_path: "./Samson_SwaroopPaturi_Resume.pdf"
++first_name: "Your"
++last_name: "Name"
++email: "your.email@example.com"
++phone: "555-123-4567"
++resume_path: "./your_resume.pdf"
+ 
+ # ── Optional ──
+-linkedin: "https://www.linkedin.com/in/samson-swaroop-paturi-49475625/"
++linkedin: "https://www.linkedin.com/in/yourprofile/"
+ website: ""
+ cover_letter_path: ""
+-location: "Atlanta, GA"
+-city: "Atlanta"
+-state: "GA"
++location: "Your City, ST"
++city: "Your City"
++state: "ST"
+ country: "United States"
+-zip_code: "30083"
++zip_code: "00000"
+ 
+ # ── Education ──
+ education_level: "Bachelor's Degree"
+-school: "Jawahar Lal Nehru Technological University"
+-degree: "B.Tech"
+-graduation_year: "2005"
++school: "Your University"
++degree: "B.S."
++graduation_year: "2020"
+ major: "Computer Science"
+ 
+ # ── Work Experience ──
+-current_company: "Adalitek"
++current_company: "Your Company"
+ current_title: "Product Manager"
+-years_experience: "21"
+-management_experience: "12"
++years_experience: "5"
++management_experience: "2"
+ 
+ # ── Common Application Questions ──
+ work_authorization: "Yes"
+ visa_sponsorship: "Yes"
+ salary_expectation: ""
+ start_date: "Immediately"
+-notice_period: "None"
++notice_period: "2 weeks"
+ willing_to_relocate: "Yes"
+ comfortable_remote: "Yes"
+ how_did_you_hear: "Company website"
+ 
+ # ── EEO / Demographics ──
+-gender: "Male"
+-race: "Asian"
++gender: ""
++race: ""
+ veteran_status: "I am not a protected veteran"
+ disability_status: "I do not wish to answer"
+ 
+@@ -55,30 +57,21 @@ custom_answers:
+   "how did you first learn": "Company website"
+   "willing to relocate": "Yes"
+   "comfortable with travel": "Yes"
+-  "years of product management": "8"
+-  "experience with ai": "Yes, 10 years of experience building AI products"
+-  "experience with ml": "Yes, 10 years of experience building AI products"
+-  "what are the industries": "Utilities, Telecom, Banking and Financial Services"
++  "years of product management": "5"
++  "experience with ai": "Yes"
++  "experience with ml": "Yes"
+   "highest level of education": "Bachelor's Degree"
+   "are you 18 years of age or older": "Yes"
+   "country": "United States"
+-  "preferred name": "Samson"
+-  "legal name": "Samson Paturi"
++  "preferred name": ""
++  "legal name": ""
+   "currently or have you ever been employed": "I have never been employed"
+   "former employee": "I have never been employed"
+   "nda": "Yes"
+   "privacy": "Yes"
+   "acknowledge": "Yes"
+-  "presales experience": "8"
+-  "most recent employer": "Adalitek"
+-  "most recent job title": "Product Manager"
+-  "current job title": "Product Manager"
+-  "current employer": "Adalitek"
+   "hispanic": "No"
+   "in-person": "Yes"
+   "hybrid": "Yes"
+   "on-site": "Yes"
+-  "believes in-person": "Yes"
+   "security clearance": "No"
+-  "current or former alphabet": "No"
+-  "current or former google": "No"
+diff --git a/requirements.txt b/requirements.txt
+index e00fa7e..a8ab037 100644
+--- a/requirements.txt
++++ b/requirements.txt
+@@ -8,9 +8,11 @@ pydantic-settings>=2.1.0
+ sqlalchemy>=2.0.25
+ alembic>=1.13.0
+ aiosqlite>=0.19.0       # async SQLite driver
++asyncpg>=0.29.0         # async PostgreSQL driver (for Docker production)
+ 
+ # Scraping
+ httpx>=0.26.0            # async HTTP client
++aiohttp>=3.9.0          # async HTTP for API mode in auto_apply
+ beautifulsoup4>=4.12.0
+ lxml>=5.1.0
+ playwright>=1.41.0       # for JS-rendered pages
+diff --git a/run_pipeline.py b/run_pipeline.py
+new file mode 100644
+index 0000000..696ce80
+--- /dev/null
++++ b/run_pipeline.py
+@@ -0,0 +1,268 @@
++#!/usr/bin/env python3
++"""
++Pipeline — crawl -> score -> mark saved -> optionally auto-apply.
++
++This is the main entry point for scheduled runs. It combines:
++  1. Crawl all sources for new jobs
++  2. Score jobs with relevance scoring + visa detection
++  3. Auto-mark high-scoring jobs as 'saved' (ready to apply)
++  4. Optionally auto-apply to saved jobs
++
++Modes (set via --mode or PIPELINE_MODE env var):
++  - crawl:       Just crawl and score (safest, no status changes)
++  - rank:        Crawl, score, and auto-mark high-scoring jobs as saved
++  - dry-apply:   Crawl, score, mark saved, then dry-run auto-apply (fills forms, no submit)
++  - apply:       Full pipeline — crawl, score, mark saved, auto-apply (SUBMITS applications)
++
++Usage:
++    python run_pipeline.py                              # Default: rank mode
++    python run_pipeline.py --mode crawl                 # Just crawl + score
++    python run_pipeline.py --mode rank --min-score 40   # Mark jobs scoring 40+ as saved
++    python run_pipeline.py --mode dry-apply              # Fill forms but don't submit
++    python run_pipeline.py --mode apply --limit 20      # Submit up to 20 applications
++    python run_pipeline.py --profile profile.yaml --mode apply
++
++Environment variables:
++    PIPELINE_MODE     - Same as --mode (crawl, rank, dry-apply, apply)
++    PIPELINE_MIN_SCORE - Minimum score to auto-save (default: 30)
++    PIPELINE_APPLY_LIMIT - Max applications per run (default: 50)
++    PIPELINE_SOURCES  - Comma-separated sources (default: all)
++"""
++
++import argparse
++import asyncio
++import os
++import sys
++from datetime import datetime, timezone
++from typing import Optional
++
++from rich.console import Console
++from rich.table import Table
++
++console = Console()
++
++
++async def run_pipeline(
++    mode: str = "rank",
++    min_score: int = 30,
++    apply_limit: int = 50,
++    sources: Optional[list[str]] = None,
++    profile_path: str = "profile.yaml",
++    headless: bool = True,
++):
++    """
++    Run the full pipeline.
++
++    Args:
++        mode: 'crawl', 'rank', 'dry-apply', or 'apply'
++        min_score: Minimum job_score to auto-mark as saved
++        apply_limit: Max applications to submit per run
++        sources: Filter to specific crawl sources
++        profile_path: Path to profile.yaml (for apply modes)
++        headless: Run browser headless for auto-apply
++    """
++    pipeline_start = datetime.now(timezone.utc)
++    console.print(f"\n[bold]🌸 Pollen Pipeline — mode: {mode}[/bold]")
++    console.print(f"  Started: {pipeline_start.isoformat()}")
++    console.print(f"  Min score for auto-save: {min_score}")
++    if mode in ("dry-apply", "apply"):
++        console.print(f"  Apply limit: {apply_limit}")
++    console.print()
++
++    # ── Step 1: Crawl ──
++    console.print("[bold cyan]━━ Step 1: Crawl ━━[/bold cyan]")
++    from scrapers.orchestrator import CrawlOrchestrator
++
++    orchestrator = CrawlOrchestrator()
++    stats = await orchestrator.run_full_crawl(sources=sources)
++
++    new_jobs = getattr(orchestrator, "new_jobs", [])
++    console.print(f"  Crawl: {stats['total_found']} found, {stats['new_jobs']} new, {stats['errors']} errors\n")
++
++    # ── Step 2: Score all unscored jobs ──
++    console.print("[bold cyan]━━ Step 2: Score & Rank ━━[/bold cyan]")
++    from utils.resume_matcher import run_batch_matching, run_visa_detection_only
++
++    # First detect visa sponsorship for all unknown jobs
++    visa_results = await run_visa_detection_only()
++    console.print(f"  Visa detection: {visa_results['detected']} found in {visa_results['total_scanned']} scanned")
++
++    # Score all unscored jobs
++    scoring_results = await run_batch_matching(limit=500, force=False)
++    console.print(f"  Scoring: {scoring_results['scored']} jobs scored\n")
++
++    # ── Step 3: Auto-mark high-scoring jobs as saved ──
++    if mode in ("rank", "dry-apply", "apply"):
++        console.print("[bold cyan]━━ Step 3: Auto-mark high-scoring jobs ━━[/bold cyan]")
++        marked = await _auto_mark_saved(min_score)
++        console.print(f"  Marked {marked} jobs as saved (score >= {min_score})\n")
++    else:
++        console.print("[dim]  Skipping auto-mark (crawl mode only)[/dim]\n")
++
++    # ── Step 4: Send alerts ──
++    console.print("[bold cyan]━━ Step 4: Alerts ━━[/bold cyan]")
++    if new_jobs:
++        from utils.alerts import check_and_send_alerts
++        try:
++            await check_and_send_alerts(new_jobs)
++            console.print(f"  Alerts sent for {len(new_jobs)} new jobs\n")
++        except Exception as e:
++            console.print(f"  [red]Alert error: {e}[/red]\n")
++    else:
++        console.print("  No new jobs to alert on\n")
++
++    # ── Step 5: Auto-apply ──
++    if mode in ("dry-apply", "apply"):
++        console.print("[bold cyan]━━ Step 5: Auto-Apply ━━[/bold cyan]")
++        console.print(f"  Mode: {'DRY RUN (no submit)' if mode == 'dry-apply' else 'SUBMITTING'}")
++        console.print(f"  Limit: {apply_limit} jobs\n")
++
++        # Import and run auto-apply directly
++        from auto_apply import ApplicantProfile, GreenhouseAutoApply
++
++        profile = ApplicantProfile(profile_path)
++        missing = profile.validate()
++        if missing:
++            console.print(f"  [red]Missing profile fields: {', '.join(missing)}[/red]")
++            console.print("  Skipping auto-apply step.\n")
++        else:
++            applier = GreenhouseAutoApply(
++                profile,
++                dry_run=(mode == "dry-apply"),
++                auto_only=True,
++                headless=headless,
++            )
++            await applier.start()
++            try:
++                # Query saved greenhouse jobs directly from DB
++                from db.session import async_session, init_db
++                from db.models import Job
++                from sqlalchemy import select
++
++                await init_db()
++                async with async_session() as session:
++                    stmt = (
++                        select(Job)
++                        .where(Job.source == "greenhouse", Job.status == "saved")
++                        .order_by(Job.job_score.desc().nullslast(), Job.first_seen_at.desc())
++                        .limit(apply_limit)
++                    )
++                    result = await session.execute(stmt)
++                    jobs = result.scalars().all()
++
++                if jobs:
++                    console.print(f"  Found {len(jobs)} saved greenhouse jobs to apply to\n")
++                    for job in jobs:
++                        await applier.apply_to_job(job.url, job.company_name, job.title)
++                        if mode == "apply":
++                            delay = asyncio.get_event_loop().time()
++                            import random as _r
++                            wait = _r.uniform(3, 8)
++                            console.print(f"  [dim]Waiting {wait:.0f}s...[/dim]")
++                            await asyncio.sleep(wait)
++                else:
++                    console.print("  No saved greenhouse jobs to apply to\n")
++            finally:
++                await applier.close()
++
++            applier.print_results()
++    else:
++        console.print("[dim]  Skipping auto-apply (crawl/rank mode only)[/dim]")
++
++    # ── Summary ──
++    elapsed = datetime.now(timezone.utc) - pipeline_start
++    console.print(f"\n[bold green]━━ Pipeline Complete ━━[/bold green]")
++    console.print(f"  Mode: {mode}")
++    console.print(f"  Elapsed: {elapsed.total_seconds():.0f}s")
++    console.print(f"  Jobs found: {stats['total_found']}")
++    console.print(f"  New jobs: {stats['new_jobs']}")
++    if mode in ("rank", "dry-apply", "apply"):
++        console.print(f"  Auto-marked saved: {marked}")
++    console.print()
++
++    return {
++        "mode": mode,
++        "elapsed_seconds": elapsed.total_seconds(),
++        "crawl_stats": stats,
++        "new_jobs_count": len(new_jobs),
++    }
++
++
++async def _auto_mark_saved(min_score: int) -> int:
++    """Mark all 'new' greenhouse jobs with score >= min_score as 'saved'."""
++    from db.session import async_session
++    from db.models import Job, JobStatus
++    from sqlalchemy import select, update as sql_update
++
++    marked = 0
++    async with async_session() as session:
++        stmt = (
++            sql_update(Job)
++            .where(
++                Job.status == JobStatus.new,
++                Job.source == "greenhouse",
++                Job.job_score >= min_score,
++            )
++            .values(status=JobStatus.saved)
++        )
++        result = await session.execute(stmt)
++        marked = result.rowcount
++        await session.commit()
++
++    return marked
++
++
++def main():
++    parser = argparse.ArgumentParser(description="Pollen Pipeline — crawl, score, and apply")
++    parser.add_argument(
++        "--mode", "-m",
++        choices=["crawl", "rank", "dry-apply", "apply"],
++        default=os.getenv("PIPELINE_MODE", "rank"),
++        help="Pipeline mode (default: rank, or PIPELINE_MODE env var)",
++    )
++    parser.add_argument(
++        "--min-score",
++        type=int,
++        default=int(os.getenv("PIPELINE_MIN_SCORE", "30")),
++        help="Minimum job_score to auto-mark as saved (default: 30)",
++    )
++    parser.add_argument(
++        "--limit",
++        type=int,
++        default=int(os.getenv("PIPELINE_APPLY_LIMIT", "50")),
++        help="Max applications per run (default: 50, or PIPELINE_APPLY_LIMIT env var)",
++    )
++    parser.add_argument(
++        "--sources", "-s",
++        type=str,
++        default=os.getenv("PIPELINE_SOURCES", ""),
++        help="Comma-separated sources (default: all)",
++    )
++    parser.add_argument(
++        "--profile", "-p",
++        default="profile.yaml",
++        help="Path to profile.yaml (for apply modes)",
++    )
++    parser.add_argument(
++        "--no-headless",
++        action="store_true",
++        help="Show browser window during auto-apply (default: headless)",
++    )
++    args = parser.parse_args()
++
++    sources = None
++    if args.sources:
++        sources = [s.strip() for s in args.sources.split(",")]
++
++    result = asyncio.run(run_pipeline(
++        mode=args.mode,
++        min_score=args.min_score,
++        apply_limit=args.limit,
++        sources=sources,
++        profile_path=args.profile,
++        headless=not args.no_headless,
++    ))
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/run_scheduler.py b/run_scheduler.py
+index 4b3fdba..9ef45f9 100644
+--- a/run_scheduler.py
++++ b/run_scheduler.py
+@@ -1,17 +1,26 @@
+ #!/usr/bin/env python3
+ """
+-Scheduler — runs the job crawler on a configurable interval.
++Scheduler — runs the Pollen pipeline on a configurable interval.
+ 
+ Usage:
+-    python run_scheduler.py
+-
+-This will:
+-1. Run an initial crawl immediately
+-2. Schedule recurring crawls every N hours (default: 6)
+-3. After each crawl, check saved searches and send alerts
++    python run_scheduler.py                              # Default: rank mode every 6h
++    python run_scheduler.py --mode crawl                  # Just crawl + score
++    python run_scheduler.py --mode rank --min-score 40    # Auto-save jobs scoring 40+
++    python run_scheduler.py --mode dry-apply              # Fill forms but don't submit
++    python run_scheduler.py --mode apply --limit 20       # Full auto-apply pipeline
++    python run_scheduler.py --interval 12                 # Every 12 hours
++
++Environment variables:
++    PIPELINE_MODE      - Same as --mode (crawl, rank, dry-apply, apply)
++    PIPELINE_MIN_SCORE - Minimum score to auto-save (default: 30)
++    PIPELINE_APPLY_LIMIT - Max applications per run (default: 50)
++    PIPELINE_SOURCES   - Comma-separated sources (default: all)
++    CRAWL_INTERVAL_HOURS - Hours between runs (default: 6)
+ """
+ 
++import argparse
+ import asyncio
++import os
+ from datetime import datetime, timezone
+ 
+ from apscheduler.schedulers.asyncio import AsyncIOScheduler
+@@ -19,43 +28,96 @@ from apscheduler.triggers.interval import IntervalTrigger
+ from rich.console import Console
+ 
+ from config.settings import settings
+-from scrapers.orchestrator import CrawlOrchestrator
+-from utils.alerts import check_and_send_alerts
++from run_pipeline import run_pipeline
+ 
+ console = Console()
+ 
+ 
+-async def run_scheduled_crawl():
+-    """Execute a full crawl and send alerts."""
+-    console.print(f"\n[bold blue]⏰ Scheduled crawl starting at {datetime.now(timezone.utc).isoformat()}[/bold blue]")
++async def run_scheduled_pipeline(mode: str, min_score: int, apply_limit: int, sources, profile: str, headless: bool, interval_hours: int):
++    """Execute the full pipeline."""
++    console.print(f"\n[bold blue]⏰ Scheduled pipeline starting at {datetime.now(timezone.utc).isoformat()}[/bold blue]")
++    console.print(f"  Mode: {mode}")
+ 
+-    orchestrator = CrawlOrchestrator()
+-    stats = await orchestrator.run_full_crawl()
++    try:
++        result = await run_pipeline(
++            mode=mode,
++            min_score=min_score,
++            apply_limit=apply_limit,
++            sources=sources,
++            profile_path=profile,
++            headless=headless,
++        )
++        console.print(f"[bold green]✓ Pipeline complete. Next run in {interval_hours} hours.[/bold green]")
++    except Exception as e:
++        console.print(f"[bold red]✗ Pipeline error: {e}[/bold red]")
+ 
+-    # Send alerts for new jobs
+-    if stats["new_jobs"] > 0:
+-        console.print(f"[bold]Checking alerts for {stats['new_jobs']} new jobs...[/bold]")
+-        # In production, you'd pass the actual new job data here
+-        # For now, this demonstrates the pattern
+-        # await check_and_send_alerts(new_jobs)
+ 
+-    console.print(f"[bold green]✓ Crawl complete. Next run in {settings.crawl.interval_hours} hours.[/bold green]")
++def main():
++    parser = argparse.ArgumentParser(description="Pollen Scheduler")
++    parser.add_argument(
++        "--mode", "-m",
++        choices=["crawl", "rank", "dry-apply", "apply"],
++        default=os.getenv("PIPELINE_MODE", "rank"),
++        help="Pipeline mode (default: rank)",
++    )
++    parser.add_argument(
++        "--min-score",
++        type=int,
++        default=int(os.getenv("PIPELINE_MIN_SCORE", "30")),
++        help="Minimum job_score to auto-mark as saved (default: 30)",
++    )
++    parser.add_argument(
++        "--limit",
++        type=int,
++        default=int(os.getenv("PIPELINE_APPLY_LIMIT", "50")),
++        help="Max applications per run (default: 50)",
++    )
++    parser.add_argument(
++        "--interval",
++        type=int,
++        default=int(os.getenv("CRAWL_INTERVAL_HOURS", str(settings.crawl.interval_hours))),
++        help="Hours between runs (default: 6)",
++    )
++    parser.add_argument(
++        "--sources", "-s",
++        type=str,
++        default=os.getenv("PIPELINE_SOURCES", ""),
++        help="Comma-separated sources (default: all)",
++    )
++    parser.add_argument(
++        "--profile", "-p",
++        default="profile.yaml",
++        help="Path to profile.yaml (for apply modes)",
++    )
++    parser.add_argument(
++        "--no-headless",
++        action="store_true",
++        help="Show browser window during auto-apply",
++    )
++    args = parser.parse_args()
+ 
++    sources = None
++    if args.sources:
++        sources = [s.strip() for s in args.sources.split(",")]
+ 
+-def main():
+     console.print("[bold]🌸 Pollen Scheduler[/bold]")
+-    console.print(f"  Crawl interval: every {settings.crawl.interval_hours} hours")
++    console.print(f"  Pipeline mode: {args.mode}")
++    console.print(f"  Interval: every {args.interval} hours")
++    console.print(f"  Min score for auto-save: {args.min_score}")
++    if args.mode in ("dry-apply", "apply"):
++        console.print(f"  Apply limit: {args.limit}")
+     console.print(f"  Companies configured: {len(settings.companies)}")
+     console.print()
+ 
+     scheduler = AsyncIOScheduler()
+ 
+-    # Schedule recurring crawls
++    # Schedule recurring pipeline runs
+     scheduler.add_job(
+-        run_scheduled_crawl,
+-        trigger=IntervalTrigger(hours=settings.crawl.interval_hours),
+-        id="full_crawl",
+-        name="Full job crawl",
++        run_scheduled_pipeline,
++        args=[args.mode, args.min_score, args.limit, sources, args.profile, not args.no_headless, args.interval],
++        trigger=IntervalTrigger(hours=args.interval),
++        id="pipeline",
++        name=f"Pollen pipeline ({args.mode})",
+         next_run_time=datetime.now(timezone.utc),  # Run immediately on start
+     )
+ 
+diff --git a/scrapers/orchestrator.py b/scrapers/orchestrator.py
+index 69bea6f..dd79b7c 100644
+--- a/scrapers/orchestrator.py
++++ b/scrapers/orchestrator.py
+@@ -44,6 +44,7 @@ class CrawlOrchestrator:
+         self.board_scraper = JobBoardScraper()
+         self.yc_scraper = YCStartupScraper()
+         self.wellfound_scraper = WellfoundScraper()
++        self.new_jobs: list[dict] = []  # populated after each crawl
+         self.stats = {
+             "total_found": 0,
+             "new_jobs": 0,
+@@ -178,11 +179,21 @@ class CrawlOrchestrator:
+         console.print(f"\n[bold]Total jobs found: {len(all_jobs)}[/bold]")
+ 
+         # ── Phase 4: Save to database ──
++        new_job_dicts: list[dict] = []
+         if dry_run:
+             console.print("[yellow]DRY RUN — not saving to database[/yellow]")
+             self._print_results(all_jobs)
+         else:
+-            await self._save_jobs(all_jobs)
++            new_job_dicts = await self._save_jobs(all_jobs)
++
++        # ── Score new jobs ──
++        if new_job_dicts:
++            try:
++                from utils.resume_matcher import run_batch_matching
++                await run_batch_matching(limit=len(new_job_dicts) + 10)
++                console.print(f"  [dim]Scored {len(new_job_dicts)} new jobs[/dim]")
++            except Exception as e:
++                console.print(f"  [yellow]Scoring warning: {e}[/yellow]")
+ 
+         # ── Cleanup ──
+         await self._cleanup()
+@@ -190,12 +201,18 @@ class CrawlOrchestrator:
+         # ── Print summary ──
+         self._print_summary()
+ 
++        # Store for caller
++        self.new_jobs = new_job_dicts
++
+         return self.stats
+ 
+-    async def _save_jobs(self, all_jobs: list[JobData]):
+-        """Save all crawled jobs to the database with dedup."""
++    async def _save_jobs(self, all_jobs: list[JobData]) -> list[dict]:
++        """Save all crawled jobs to the database with dedup.
++        Returns list of new job dicts (for alerting)."""
+         console.print(f"\n[bold]Saving to database...[/bold]")
+ 
++        new_job_dicts: list[dict] = []
++
+         async with async_session() as session:
+             crawl_log = await log_crawl(session, source="full_crawl")
+ 
+@@ -204,6 +221,18 @@ class CrawlOrchestrator:
+                     job, is_new = await upsert_job(session, job_data.to_dict())
+                     if is_new:
+                         self.stats["new_jobs"] += 1
++                        new_job_dicts.append({
++                            "id": job.id,
++                            "title": job.title,
++                            "company_name": job.company_name,
++                            "location": job.location or "",
++                            "remote": job.remote,
++                            "url": job.url,
++                            "salary_min": job.salary_min,
++                            "salary_max": job.salary_max,
++                            "source": job.source,
++                            "tags": job.tags or [],
++                        })
+                     else:
+                         self.stats["updated_jobs"] += 1
+                 except Exception as e:
+@@ -223,6 +252,8 @@ class CrawlOrchestrator:
+             f"{self.stats['updated_jobs']} updated[/green]"
+         )
+ 
++        return new_job_dicts
++
+     async def run_single_source(self, source: str, company_name: Optional[str] = None):
+         """Run crawler for a single source/company."""
+         return await self.run_full_crawl(sources=[source])
+diff --git a/utils/resume_matcher.py b/utils/resume_matcher.py
+new file mode 100644
+index 0000000..d82cbb2
+--- /dev/null
++++ b/utils/resume_matcher.py
+@@ -0,0 +1,300 @@
++"""
++Resume Matcher & Job Scoring Utility.
++
++Provides lightweight, transparent relevance scoring for jobs based on:
++  - Title keyword overlap with target role
++  - Tag matches (AI/ML, GenAI, Platform, etc.)
++  - Seniority alignment
++  - Remote/location fit
++  - Salary range
++  - Visa sponsorship detection
++  - Negative filters (defense, clearance, etc.)
++
++No embeddings required — this is fast, debuggable, and runs locally.
++
++Also provides visa sponsorship detection by scanning job descriptions
++for common sponsorship-related phrases.
++"""
++
++import re
++from datetime import datetime, timezone
++from typing import Optional, TYPE_CHECKING
++
++if TYPE_CHECKING:
++    from db.models import Job
++
++
++# ── Scoring Config ──────────────────────────────────────────────────────────
++
++# Target role keywords — weighted higher
++TARGET_KEYWORDS = {
++    # Role (highest weight)
++    "product manager": 25,
++    "senior product manager": 30,
++    "staff product manager": 35,
++    "group product manager": 30,
++    "principal product manager": 35,
++    "head of product": 30,
++    "director of product": 30,
++    "vp of product": 30,
++    # AI/ML (high weight)
++    "ai product": 20,
++    "ml product": 20,
++    "ai/ml": 15,
++    "machine learning": 10,
++    "generative ai": 15,
++    "genai": 15,
++    "llm": 10,
++    # Platform/infra (medium)
++    "platform product": 15,
++    "infrastructure product": 15,
++    "data product": 15,
++    # Growth/analytics (medium)
++    "growth product": 12,
++    "analytics product": 12,
++}
++
++# Tags that add to score
++TAG_WEIGHTS = {
++    "AI/ML": 15,
++    "GenAI": 15,
++    "Data Platform": 10,
++    "Analytics": 8,
++    "Platform": 10,
++    "B2B": 5,
++    "Growth": 8,
++    "Fintech": 5,
++    "0→1": 10,
++    "Enterprise": 5,
++}
++
++# Seniority alignment (assume target is Senior PM / Staff PM)
++SENIORITY_SCORE = {
++    "IC5": 15,  # Senior
++    "IC6": 15,  # Staff/Principal
++    "VP": 10,
++    "Director": 10,
++    "IC4": 10,  # Mid (still acceptable)
++    "Manager": 8,
++    "IC3": 0,   # Junior (not ideal)
++}
++
++# Negative filters — subtract from score or skip entirely
++NEGATIVE_KEYWORDS = {
++    "defense": -40,
++    "clearance": -40,
++    "secret clearance": -50,
++    "top secret": -50,
++    "ts/sci": -50,
++    "anduril": -50,
++    "palantir": -15,
++    "lockheed": -40,
++    "raytheon": -40,
++    "northrop": -40,
++    "contractor": -10,
++    "intern": -30,
++    "junior": -10,
++    "associate": -5,
++    "entry level": -20,
++}
++
++# Visa sponsorship detection patterns
++VISA_POSITIVE_PATTERNS = [
++    r"visa\s+sponsorship",
++    r"will\s+sponsor",
++    r"offer\s+sponsorship",
++    r"provide\s+visa",
++    r"h1b\s+sponsor",
++    r"opt\s+stem",
++    r"work\s+visa\s+sponsorship",
++    r"immigration\s+support",
++    r"we\s+sponsor",
++    r"sponsorship\s+available",
++    r"sponsorship\s+is\s+available",
++    r"may\s+provide\s+sponsorship",
++]
++
++VISA_NEGATIVE_PATTERNS = [
++    r"no\s+visa\s+sponsorship",
++    r"unable\s+to\s+sponsor",
++    r"cannot\s+sponsor",
++    r"no\s+sponsorship",
++    r"not\s+offer\s+sponsorship",
++    r"must\s+be\s+authorized\s+to\s+work",
++    r"without\s+sponsorship",
++    r"does\s+not\s+provide\s+sponsorship",
++    r"unsponsored",
++    r"no\s+future\s+sponsorship",
++]
++
++
++def score_job(job: "Job", target_keywords: dict = None, tag_weights: dict = None,
++               negative_keywords: dict = None) -> tuple[int, str]:
++    """
++    Calculate a relevance score for a job (0-100).
++
++    Returns (score, details_string).
++    """
++    kw = target_keywords or TARGET_KEYWORDS
++    tw = tag_weights or TAG_WEIGHTS
++    nk = negative_keywords or NEGATIVE_KEYWORDS
++
++    title = (job.title or "").lower()
++    description = (job.description or "").lower()
++    full_text = f"{title} {description}"
++    tags = job.tags or []
++    level = job.level or ""
++    company = (job.company_name or "").lower()
++
++    score = 0
++    details = []
++
++    # ── Title keyword matching ──
++    title_score = 0
++    for keyword, weight in kw.items():
++        if keyword in title:
++            title_score = max(title_score, weight)
++            details.append(f"title:'{keyword}'(+{weight})")
++    score += title_score
++
++    # ── Tag matching ──
++    tag_score = 0
++    for tag in tags:
++        if tag in tw:
++            tag_score += tw[tag]
++            details.append(f"tag:{tag}(+{tw[tag]})")
++    score += min(tag_score, 30)  # cap tag bonus
++
++    # ── Seniority ──
++    level_score = SENIORITY_SCORE.get(level, 0)
++    if level_score:
++        score += level_score
++        details.append(f"level:{level}(+{level_score})")
++
++    # ── Remote bonus ──
++    if job.remote:
++        score += 5
++        details.append("remote(+5)")
++
++    # ── Salary bonus ──
++    if job.salary_max and job.salary_max >= 150000:
++        score += 5
++        details.append(f"salary${job.salary_max//1000}k(+5)")
++
++    # ── Visa sponsorship bonus ──
++    if job.visa_sponsorship == "yes":
++        score += 10
++        details.append("visa_sponsor(+10)")
++
++    # ── Negative filters ──
++    for keyword, penalty in nk.items():
++        if keyword in full_text or keyword in company:
++            score += penalty  # penalty is negative
++            details.append(f"neg:'{keyword}'({penalty})")
++
++    # Clamp to 0-100
++    score = max(0, min(100, score))
++
++    return score, "; ".join(details)
++
++
++def detect_visa_sponsorship(description: str) -> str:
++    """
++    Scan a job description for visa sponsorship signals.
++    Returns 'yes', 'no', or 'unknown'.
++    """
++    if not description:
++        return "unknown"
++
++    desc_lower = description.lower()
++
++    # Check negative patterns first (they're more definitive)
++    for pattern in VISA_NEGATIVE_PATTERNS:
++        if re.search(pattern, desc_lower):
++            return "no"
++
++    # Check positive patterns
++    for pattern in VISA_POSITIVE_PATTERNS:
++        if re.search(pattern, desc_lower):
++            return "yes"
++
++    return "unknown"
++
++
++async def run_batch_matching(limit: int = 50, force: bool = False) -> dict:
++    """
++    Score all unscored (or all if force=True) jobs.
++    Updates resume_match_score, resume_match_details, job_score, and visa_sponsorship in DB.
++    """
++    from db.session import async_session
++    from db.models import Job
++    from sqlalchemy import select
++
++    async with async_session() as session:
++        if force:
++            stmt = select(Job).order_by(Job.first_seen_at.desc()).limit(limit)
++        else:
++            stmt = (
++                select(Job)
++                .where(Job.job_score.is_(None))
++                .order_by(Job.first_seen_at.desc())
++                .limit(limit)
++            )
++
++        result = await session.execute(stmt)
++        jobs = list(result.scalars().all())
++
++        scored = 0
++        visa_detected = 0
++
++        for job in jobs:
++            # Detect visa sponsorship if unknown
++            if job.visa_sponsorship == "unknown" or job.visa_sponsorship is None:
++                visa = detect_visa_sponsorship(job.description or "")
++                job.visa_sponsorship = visa
++                if visa != "unknown":
++                    visa_detected += 1
++
++            # Score the job
++            score, details = score_job(job)
++            job.job_score = score
++            job.resume_match_score = score
++            job.resume_match_details = details
++            scored += 1
++
++        await session.commit()
++
++    return {
++        "scored": scored,
++        "visa_detected": visa_detected,
++        "total": len(jobs),
++    }
++
++
++async def run_visa_detection_only() -> dict:
++    """
++    Scan all job descriptions for visa sponsorship info without scoring.
++    """
++    from db.session import async_session
++    from db.models import Job
++    from sqlalchemy import select
++
++    async with async_session() as session:
++        stmt = (
++            select(Job)
++            .where(Job.visa_sponsorship == "unknown")
++            .order_by(Job.first_seen_at.desc())
++        )
++        result = await session.execute(stmt)
++        jobs = list(result.scalars().all())
++
++        detected = 0
++        for job in jobs:
++            visa = detect_visa_sponsorship(job.description or "")
++            if visa != "unknown":
++                job.visa_sponsorship = visa
++                detected += 1
++
++        await session.commit()
++
++    return {"total_scanned": len(jobs), "detected": detected}
+-- 
+2.53.0
+

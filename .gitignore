@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.env
+jobs.db
+screenshots/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+node_modules/
+venv/
+.venv/
+*.db-journal
+profile.yaml

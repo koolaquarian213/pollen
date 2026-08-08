@@ -1,0 +1,54 @@
+# Pollen Job Crawler Configuration
+# Copy this to settings.yaml and customize
+
+crawl:
+  interval_hours: 6
+  max_concurrent: 5
+  request_delay: 1.5
+  role_keywords:
+    - product design
+    - ux design
+    - ui design
+    - interaction design
+    - visual design
+    - brand design
+    - design system
+    - ux research
+    - content design
+    - ux writ
+    - design technolog
+    - design engineer
+    - design lead
+    - design director
+    - head of design
+    - vp design
+    - product manager
+    - design manager
+
+# Add your target companies here
+companies:
+  # Greenhouse-powered companies
+  - name: Stripe
+    careers_url: https://stripe.com/jobs
+    ats: greenhouse
+    ats_board_id: stripe
+
+  - name: Figma
+    careers_url: https://figma.com/careers
+    ats: greenhouse
+    ats_board_id: figma
+
+  - name: Notion
+    careers_url: https://notion.so/careers
+    ats: greenhouse
+    ats_board_id: notion
+
+  # Lever-powered companies
+  - name: Spotify
+    careers_url: https://lifeatspotify.com
+    ats: lever
+    ats_board_id: spotify
+
+  # Custom career pages (scraped with Playwright + LLM)
+  - name: Apple
+    careers_url: https://jobs.apple.com/en-us/search?search=design&sort=relevance

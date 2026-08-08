@@ -1,0 +1,607 @@
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # FORTUNE 500 — TECH-HEAVY COMPANIES
+  # Excludes: Google, Apple, Amazon, Meta, Microsoft, Netflix,
+  #           Nvidia, and companies already in your main config
+  # Focused on: Companies with strong AI/Data/Tech PM hiring
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  # ─────────────────────────────────────────────────────────
+  # ENTERPRISE SOFTWARE & CLOUD (Highest PM density)
+  # ─────────────────────────────────────────────────────────
+
+  - name: Salesforce
+    careers_url: https://careers.salesforce.com/en/jobs/?search=product+manager+AI&pagesize=50
+
+  - name: Oracle
+    careers_url: https://careers.oracle.com/jobs/#en/sites/jobsearch/requisitions?keyword=AI+product+manager
+
+  - name: IBM
+    careers_url: https://www.ibm.com/careers/search?field_keyword_18[0]=Product%20Management
+
+  - name: SAP
+    careers_url: https://jobs.sap.com/search/?q=AI+product+manager
+
+  - name: ServiceNow
+    careers_url: https://careers.servicenow.com/jobs/?q=product+manager+AI
+
+  - name: Adobe
+    careers_url: https://careers.adobe.com/us/en/search-results?keywords=product%20manager%20AI
+
+  - name: Intuit
+    careers_url: https://jobs.intuit.com/search-jobs/AI%20product%20manager
+
+  - name: Workday
+    careers_url: https://workday.wd5.myworkdayjobs.com/Workday?q=product+manager+AI
+
+  - name: Atlassian
+    careers_url: https://www.atlassian.com/company/careers/all-jobs?search=product+manager
+
+  - name: Splunk (Cisco)
+    careers_url: https://jobs.cisco.com/jobs/SearchJobs/product%20manager%20AI%20splunk
+
+  - name: Elastic
+    careers_url: https://www.elastic.co/careers
+    ats: greenhouse
+    ats_board_id: elastic
+
+  - name: Palantir
+    careers_url: https://www.palantir.com/careers/?search=product+manager
+
+  - name: Pegasystems
+    careers_url: https://www.pega.com/about/careers/search?search=product+manager
+
+  - name: Autodesk
+    careers_url: https://www.autodesk.com/careers/search?keyword=product+manager+AI
+
+  - name: Informatica
+    careers_url: https://www.informatica.com/about-us/careers.html
+
+  - name: Teradata
+    careers_url: https://careers.teradata.com/search/?q=product+manager
+
+  - name: DocuSign
+    careers_url: https://www.docusign.com/company/careers
+    ats: greenhouse
+    ats_board_id: docusign
+
+  - name: HubSpot
+    careers_url: https://www.hubspot.com/careers/jobs
+    ats: greenhouse
+    ats_board_id: hubspot
+
+  - name: Zendesk
+    careers_url: https://jobs.zendesk.com/us/en/search-results?keywords=product+manager
+
+  - name: MongoDB
+    careers_url: https://www.mongodb.com/company/careers
+    ats: greenhouse
+    ats_board_id: mongodb
+
+  - name: Okta
+    careers_url: https://www.okta.com/company/careers/
+    ats: greenhouse
+    ats_board_id: okta
+
+  - name: Twilio
+    careers_url: https://www.twilio.com/en-us/company/jobs
+    ats: greenhouse
+    ats_board_id: twilio
+
+  - name: Dynatrace
+    careers_url: https://careers.dynatrace.com/jobs/?search=product+manager
+
+  - name: Veeva Systems
+    careers_url: https://careers.veeva.com/search-jobs?keyword=product+manager
+
+  # ─────────────────────────────────────────────────────────
+  # CYBERSECURITY (High tech PM demand)
+  # ─────────────────────────────────────────────────────────
+
+  - name: Palo Alto Networks
+    careers_url: https://jobs.paloaltonetworks.com/en/jobs/?search=product+manager+AI
+
+  - name: CrowdStrike
+    careers_url: https://crowdstrike.wd5.myworkdayjobs.com/crowdstrikecareers?q=product%20manager
+
+  - name: Fortinet
+    careers_url: https://edel.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX/requisitions?keyword=product+manager
+
+  - name: Zscaler
+    careers_url: https://www.zscaler.com/careers?search=product+manager
+
+  - name: SentinelOne
+    careers_url: https://www.sentinelone.com/careers/
+    ats: greenhouse
+    ats_board_id: sentinelone
+
+  - name: Rapid7
+    careers_url: https://careers.rapid7.com/search-jobs?keyword=product+manager
+
+  - name: Varonis
+    careers_url: https://www.varonis.com/company/careers
+
+  - name: Tenable
+    careers_url: https://careers.tenable.com/search?query=product+manager
+
+  # ─────────────────────────────────────────────────────────
+  # FINTECH & FINANCIAL SERVICES (Data/AI PM heavy)
+  # ─────────────────────────────────────────────────────────
+
+  - name: JPMorgan Chase
+    careers_url: https://jpmc.fa.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/requisitions?keyword=AI+product+manager
+
+  - name: Goldman Sachs
+    careers_url: https://higher.gs.com/roles?q=product+manager+AI
+
+  - name: Morgan Stanley
+    careers_url: https://ms.taleo.net/careersection/2/jobsearch.ftl?lang=en&keyword=AI+product+manager
+
+  - name: Capital One
+    careers_url: https://www.capitalonecareers.com/search-jobs/AI%20product%20manager
+
+  - name: American Express
+    careers_url: https://aexp.eightfold.ai/careers?query=product%20manager%20AI
+
+  - name: Visa
+    careers_url: https://corporate.visa.com/en/careers.html
+
+  - name: Mastercard
+    careers_url: https://careers.mastercard.com/us/en/search-results?keywords=AI%20product%20manager
+
+  - name: Fidelity Investments
+    careers_url: https://jobs.fidelity.com/job-search-results/?keyword=AI%20product%20manager
+
+  - name: Charles Schwab
+    careers_url: https://www.aboutschwab.com/careers
+
+  - name: PayPal
+    careers_url: https://paypal.eightfold.ai/careers?query=AI%20product%20manager
+
+  - name: Block (Square/CashApp)
+    careers_url: https://careers.squareup.com/us/en/jobs?q=product+manager
+
+  - name: Robinhood
+    careers_url: https://robinhood.com/us/en/careers/openings/
+    ats: greenhouse
+    ats_board_id: robinhood
+
+  - name: Marqeta
+    careers_url: https://www.marqeta.com/company/careers
+    ats: greenhouse
+    ats_board_id: marqeta
+
+  - name: Toast
+    careers_url: https://careers.toasttab.com/jobs/search
+    ats: greenhouse
+    ats_board_id: toast
+
+  - name: Affirm
+    careers_url: https://www.affirm.com/careers
+    ats: greenhouse
+    ats_board_id: affirm
+
+  - name: SoFi
+    careers_url: https://www.sofi.com/careers/
+    ats: greenhouse
+    ats_board_id: sofi
+
+  - name: Chime
+    careers_url: https://www.chime.com/careers/
+    ats: greenhouse
+    ats_board_id: chime
+
+  # ─────────────────────────────────────────────────────────
+  # SEMICONDUCTORS & HARDWARE (Technical PM roles)
+  # ─────────────────────────────────────────────────────────
+
+  - name: Intel
+    careers_url: https://jobs.intel.com/en/search-jobs/AI+product+manager
+
+  - name: AMD
+    careers_url: https://careers.amd.com/careers-home/jobs?keywords=product%20manager%20AI
+
+  - name: Qualcomm
+    careers_url: https://careers.qualcomm.com/careers?query=product%20manager%20AI
+
+  - name: Texas Instruments
+    careers_url: https://careers.ti.com/search-jobs/product%20manager
+
+  - name: Broadcom
+    careers_url: https://jobs.broadcom.com/search-jobs/product%20manager%20AI
+
+  - name: Micron
+    careers_url: https://careers.micron.com/careers/search?query=product+manager
+
+  - name: Applied Materials
+    careers_url: https://careers.appliedmaterials.com/careers?query=product+manager+AI
+
+  - name: Marvell
+    careers_url: https://www.marvell.com/company/careers.html
+
+  - name: Analog Devices
+    careers_url: https://careers.analog.com/search-jobs?keyword=product+manager
+
+  # ─────────────────────────────────────────────────────────
+  # TELECOM & NETWORKING (Platform PM roles)
+  # ─────────────────────────────────────────────────────────
+
+  - name: Cisco
+    careers_url: https://jobs.cisco.com/jobs/SearchJobs/AI%20product%20manager
+
+  - name: T-Mobile
+    careers_url: https://careers.t-mobile.com/search-jobs/product%20manager%20AI
+
+  - name: Verizon
+    careers_url: https://mycareer.verizon.com/jobs/SearchJobs/AI%20product%20manager
+
+  - name: AT&T
+    careers_url: https://www.att.jobs/search-jobs/product%20manager%20AI
+
+  - name: Comcast
+    careers_url: https://jobs.comcast.com/search-jobs/product%20manager%20AI
+
+  - name: Juniper Networks
+    careers_url: https://jobs.juniper.net/careers?query=product+manager
+
+  - name: Arista Networks
+    careers_url: https://www.arista.com/en/careers
+
+  # ─────────────────────────────────────────────────────────
+  # HEALTHCARE TECH (Growing AI/Data PM demand)
+  # ─────────────────────────────────────────────────────────
+
+  - name: UnitedHealth Group / Optum
+    careers_url: https://careers.unitedhealthgroup.com/job-search-results/?keyword=AI%20product%20manager
+
+  - name: Elevance Health
+    careers_url: https://careers.elevancehealth.com/us/en/search-results?keywords=product%20manager%20AI
+
+  - name: CVS Health / Aetna
+    careers_url: https://jobs.cvshealth.com/us/en/search-results?keywords=product%20manager%20AI
+
+  - name: Cigna / Evernorth
+    careers_url: https://jobs.thecignagroup.com/us/en/search-results?keywords=product%20manager%20AI
+
+  - name: Humana
+    careers_url: https://careers.humana.com/job-search-results/?keyword=product%20manager%20AI
+
+  - name: Epic Systems
+    careers_url: https://careers.epic.com/
+
+  - name: Cerner (Oracle Health)
+    careers_url: https://careers.oracle.com/jobs/#en/sites/jobsearch/requisitions?keyword=product+manager+cerner+AI
+
+  - name: Veracyte
+    careers_url: https://www.veracyte.com/careers
+
+  - name: Tempus AI
+    careers_url: https://www.tempus.com/careers/
+    ats: lever
+    ats_board_id: tempus
+
+  - name: Flatiron Health
+    careers_url: https://flatironhealth.com/careers
+    ats: greenhouse
+    ats_board_id: flatironhealth
+
+  # ─────────────────────────────────────────────────────────
+  # E-COMMERCE & RETAIL TECH
+  # ─────────────────────────────────────────────────────────
+
+  - name: Shopify
+    careers_url: https://www.shopify.com/careers/search?keywords=product+manager
+
+  - name: Uber
+    careers_url: https://www.uber.com/us/en/careers/list/?query=product%20manager%20AI
+
+  - name: Lyft
+    careers_url: https://www.lyft.com/careers#openings?q=product+manager
+
+  - name: DoorDash
+    careers_url: https://careers.doordash.com
+    ats: greenhouse
+    ats_board_id: doordash
+
+  - name: Instacart
+    careers_url: https://instacart.careers
+    ats: greenhouse
+    ats_board_id: instacart
+
+  - name: Wayfair
+    careers_url: https://www.aboutwayfair.com/careers/jobs?search=product+manager
+    ats: greenhouse
+    ats_board_id: wayfair
+
+  - name: eBay
+    careers_url: https://jobs.ebayinc.com/search-jobs/product%20manager%20AI
+
+  - name: Etsy
+    careers_url: https://careers.etsy.com/global/en/search-results?keywords=product%20manager
+    ats: greenhouse
+    ats_board_id: etsy
+
+  - name: Chewy
+    careers_url: https://careers.chewy.com/us/en/search-results?keywords=product%20manager
+
+  - name: Walmart Global Tech
+    careers_url: https://careers.walmart.com/results?q=AI+product+manager&page=1&sort=rank&jobCareerArea=0000015e-c1a2-d3e9-afde-e3bae9570000
+
+  - name: Target Tech
+    careers_url: https://jobs.target.com/search-jobs/product%20manager%20AI
+
+  - name: Home Depot Tech
+    careers_url: https://careers.homedepot.com/search-jobs/product%20manager%20AI
+
+  - name: Kroger Tech
+    careers_url: https://jobs.kroger.com/kroger/search/?q=product+manager+AI
+
+  # ─────────────────────────────────────────────────────────
+  # TRAVEL & TRANSPORTATION TECH
+  # ─────────────────────────────────────────────────────────
+
+  - name: Booking Holdings
+    careers_url: https://careers.bookingholdings.com/jobs/?search=product+manager
+
+  - name: Expedia Group
+    careers_url: https://careers.expediagroup.com/jobs/?search=product+manager+AI
+
+  - name: Airbnb
+    careers_url: https://careers.airbnb.com
+    ats: greenhouse
+    ats_board_id: airbnb
+
+  - name: Delta Air Lines
+    careers_url: https://delta.avature.net/careers/SearchJobs?search=product+manager
+
+  - name: United Airlines
+    careers_url: https://careers.united.com/us/en/search-results?keywords=product%20manager
+
+  - name: FedEx
+    careers_url: https://careers.fedex.com/dataworks/jobs?keywords=product%20manager
+
+  - name: Flexport
+    careers_url: https://www.flexport.com/careers
+    ats: greenhouse
+    ats_board_id: flexport
+
+  # ─────────────────────────────────────────────────────────
+  # CONSULTING & PROFESSIONAL SERVICES (Tech divisions)
+  # ─────────────────────────────────────────────────────────
+
+  - name: Accenture
+    careers_url: https://www.accenture.com/us-en/careers/jobsearch?jk=product+manager+AI
+
+  - name: Deloitte
+    careers_url: https://apply.deloitte.com/careers/SearchJobs/AI%20product%20manager
+
+  - name: McKinsey (QuantumBlack)
+    careers_url: https://www.mckinsey.com/careers/search-jobs?query=product+manager+AI
+
+  - name: BCG (BCG X)
+    careers_url: https://careers.bcg.com/job-search?query=product+manager
+
+  - name: Booz Allen Hamilton
+    careers_url: https://careers.boozallen.com/jobs?keywords=product+manager+AI
+
+  - name: KPMG
+    careers_url: https://www.kpmg.us/careers.html
+
+  - name: PwC
+    careers_url: https://www.pwc.com/us/en/careers.html
+
+  # ─────────────────────────────────────────────────────────
+  # MEDIA, ENTERTAINMENT & GAMING
+  # ─────────────────────────────────────────────────────────
+
+  - name: Spotify
+    careers_url: https://lifeatspotify.com
+    ats: lever
+    ats_board_id: spotify
+
+  - name: Disney Streaming
+    careers_url: https://jobs.disneycareers.com/search-jobs/product%20manager%20AI
+
+  - name: Warner Bros Discovery
+    careers_url: https://careers.wbd.com/global/en/search-results?keywords=product%20manager
+
+  - name: Roblox
+    careers_url: https://careers.roblox.com/jobs
+    ats: greenhouse
+    ats_board_id: roblox
+
+  - name: Unity
+    careers_url: https://careers.unity.com/search?query=product+manager
+    ats: greenhouse
+    ats_board_id: unity
+
+  - name: Electronic Arts (EA)
+    careers_url: https://ea.gr8people.com/jobs?search=product+manager+AI
+
+  - name: Activision Blizzard (Microsoft)
+    careers_url: https://careers.activisionblizzard.com/results?keywords=product%20manager
+
+  # ─────────────────────────────────────────────────────────
+  # DEFENSE & AEROSPACE (AI/ML PM growing fast)
+  # ─────────────────────────────────────────────────────────
+
+  - name: Lockheed Martin
+    careers_url: https://www.lockheedmartinjobs.com/search-jobs/AI%20product%20manager
+
+  - name: Raytheon (RTX)
+    careers_url: https://careers.rtx.com/global/en/search-results?keywords=product%20manager%20AI
+
+  - name: Northrop Grumman
+    careers_url: https://www.northropgrumman.com/jobs/?search=product+manager+AI
+
+  - name: General Dynamics
+    careers_url: https://gdmissionsystems.com/careers/search?q=product+manager
+
+  - name: L3Harris
+    careers_url: https://careers.l3harris.com/search-jobs/product%20manager%20AI
+
+  - name: Leidos
+    careers_url: https://careers.leidos.com/search/jobs?q=product+manager+AI
+
+  - name: SAIC
+    careers_url: https://jobs.saic.com/search-jobs/product%20manager%20AI
+
+  - name: Anduril
+    careers_url: https://www.anduril.com/careers
+    ats: greenhouse
+    ats_board_id: andurilindustries
+
+  - name: Shield AI
+    careers_url: https://www.shield.ai/careers
+    ats: greenhouse
+    ats_board_id: shieldai
+
+  # ─────────────────────────────────────────────────────────
+  # AUTOMOTIVE & MOBILITY (Autonomous/AI heavy)
+  # ─────────────────────────────────────────────────────────
+
+  - name: Tesla
+    careers_url: https://www.tesla.com/careers/search/?query=product%20manager&region=5
+
+  - name: General Motors (Cruise/AI)
+    careers_url: https://search-careers.gm.com/en/jobs/?search=product+manager+AI
+
+  - name: Ford
+    careers_url: https://efds.fa.em5.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions?keyword=AI+product+manager
+
+  - name: Rivian
+    careers_url: https://rivian.com/careers
+    ats: greenhouse
+    ats_board_id: rivian
+
+  - name: Waymo
+    careers_url: https://waymo.com/careers/
+    ats: greenhouse
+    ats_board_id: waymo
+
+  - name: Aurora Innovation
+    careers_url: https://aurora.tech/careers
+    ats: greenhouse
+    ats_board_id: aurorainnovation
+
+  - name: John Deere
+    careers_url: https://jobs.deere.com/search/?q=product+manager+AI
+
+  - name: Caterpillar
+    careers_url: https://careers.caterpillar.com/en/jobs/?search=product+manager+AI
+
+  # ─────────────────────────────────────────────────────────
+  # INSURANCE & INSURTECH (Data PM demand)
+  # ─────────────────────────────────────────────────────────
+
+  - name: Progressive
+    careers_url: https://www.progressive.com/careers/search-jobs/?keyword=product+manager
+
+  - name: Allstate
+    careers_url: https://www.allstate.jobs/search-jobs/product%20manager%20AI
+
+  - name: MetLife
+    careers_url: https://jobs.metlife.com/search-jobs/AI%20product%20manager
+
+  - name: Travelers
+    careers_url: https://careers.travelers.com/search-jobs?keywords=product+manager
+
+  - name: Liberty Mutual
+    careers_url: https://jobs.libertymutual.com/search-jobs/product%20manager%20AI
+
+  - name: Root Insurance
+    careers_url: https://www.joinroot.com/careers/
+    ats: greenhouse
+    ats_board_id: joinroot
+
+  # ─────────────────────────────────────────────────────────
+  # ENERGY & INDUSTRIALS (Digital transformation PMs)
+  # ─────────────────────────────────────────────────────────
+
+  - name: GE Vernova
+    careers_url: https://careers.gevernova.com/global/en/search-results?keywords=product%20manager%20AI
+
+  - name: Honeywell
+    careers_url: https://careers.honeywell.com/us/en/search-results?keywords=product%20manager%20AI
+
+  - name: Siemens
+    careers_url: https://jobs.siemens.com/careers?query=product+manager+AI&location=United+States
+
+  - name: Schneider Electric
+    careers_url: https://www.se.com/us/en/about-us/careers/overview.jsp
+
+  - name: Emerson
+    careers_url: https://www.emerson.com/en-us/careers/search-results?keyword=product+manager
+
+  - name: Rockwell Automation
+    careers_url: https://www.rockwellautomation.com/en-us/company/careers.html
+
+  - name: Baker Hughes
+    careers_url: https://careers.bakerhughes.com/global/en/search-results?keywords=product%20manager
+
+  # ─────────────────────────────────────────────────────────
+  # FAST-GROWING TECH (Not yet Fortune 500 but close)
+  # ─────────────────────────────────────────────────────────
+
+  - name: Snowflake
+    careers_url: https://careers.snowflake.com
+    ats: greenhouse
+    ats_board_id: snowflakecomputing
+
+  - name: Palantir
+    careers_url: https://www.palantir.com/careers/?search=product+manager
+
+  - name: CrowdStrike
+    careers_url: https://crowdstrike.wd5.myworkdayjobs.com/crowdstrikecareers?q=product%20manager
+
+  - name: Trade Desk
+    careers_url: https://www.thetradedesk.com/us/careers
+    ats: greenhouse
+    ats_board_id: thetradedesk
+
+  - name: Confluent
+    careers_url: https://www.confluent.io/careers/
+    ats: greenhouse
+    ats_board_id: confluent
+
+  - name: HashiCorp
+    careers_url: https://www.hashicorp.com/careers
+    ats: greenhouse
+    ats_board_id: hashicorp
+
+  - name: Cloudflare
+    careers_url: https://www.cloudflare.com/careers/
+    ats: greenhouse
+    ats_board_id: cloudflare
+
+  - name: Nutanix
+    careers_url: https://www.nutanix.com/company/careers
+
+  - name: UiPath
+    careers_url: https://www.uipath.com/company/careers
+    ats: greenhouse
+    ats_board_id: uipath
+
+  - name: C3.ai
+    careers_url: https://c3.ai/careers/
+    ats: greenhouse
+    ats_board_id: c3iot
+
+  - name: Celonis
+    careers_url: https://www.celonis.com/careers/
+    ats: greenhouse
+    ats_board_id: celonis
+
+  - name: Rubrik
+    careers_url: https://www.rubrik.com/company/careers
+    ats: greenhouse
+    ats_board_id: rubrik
+
+  - name: Wiz
+    careers_url: https://www.wiz.io/careers
+    ats: ashby
+    ats_board_id: wiz
+
+  - name: Abridge
+    careers_url: https://www.abridge.com/careers
+    ats: ashby
+    ats_board_id: abridge
