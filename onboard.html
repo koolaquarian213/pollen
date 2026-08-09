@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pollen — Get Started</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FBFBFA; --surface: #FFFFFF; --surface2: #F7F7F5; --surface3: #EFEFED;
+  --border: #E8E8E4; --border2: #D8D8D4;
+  --text: #1A1A18; --text2: #6B6B65; --text3: #9B9B95;
+  --accent: #2C5FE0; --accent2: #1D4FD0; --accentBg: #EEF2FE;
+  --green: #1A8754; --greenBg: #E8F5EE;
+  --red: #D03030; --purple: #7C3AED; --purpleBg: #F3EEFE;
+  --radius: 10px;
+  --font: 'IBM Plex Sans', -apple-system, sans-serif;
+  --serif: 'Newsreader', Georgia, serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); text-decoration: none; }
+
+.container { max-width: 640px; margin: 0 auto; padding: 48px 24px; }
+
+/* Header */
+.header { text-align: center; margin-bottom: 48px; }
+.logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.logo svg { width: 28px; height: 28px; }
+.logo-text { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.header h1 { font-family: var(--serif); font-size: 32px; font-weight: 600; letter-spacing: -0.5px; line-height: 1.2; margin-bottom: 8px; }
+.header p { font-size: 15px; color: var(--text2); line-height: 1.5; max-width: 440px; margin: 0 auto; }
+
+/* Steps */
+.steps { display: flex; gap: 4px; justify-content: center; margin-bottom: 36px; }
+.step-dot { width: 32px; height: 4px; border-radius: 2px; background: var(--border); transition: all 0.3s; }
+.step-dot.active { background: var(--accent); width: 48px; }
+.step-dot.done { background: var(--green); }
+
+/* Cards */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; margin-bottom: 20px; }
+.card-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.card-title .num { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+
+/* Upload area */
+.upload-zone {
+  border: 2px dashed var(--border2); border-radius: var(--radius);
+  padding: 40px 20px; text-align: center; cursor: pointer;
+  transition: all 0.2s; background: var(--surface2);
+}
+.upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: var(--accentBg); }
+.upload-zone.uploaded { border-color: var(--green); border-style: solid; background: var(--greenBg); }
+.upload-zone svg { margin-bottom: 8px; }
+.upload-zone p { font-size: 13px; color: var(--text2); }
+.upload-zone .filename { font-size: 13px; font-weight: 600; color: var(--green); margin-top: 4px; }
+.upload-zone input { display: none; }
+
+/* Form fields */
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field.full { grid-column: 1 / -1; }
+.field label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); }
+.field input, .field select {
+  padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px;
+  font-size: 13px; color: var(--text); background: var(--surface2);
+  outline: none; font-family: inherit;
+}
+.field input:focus, .field select:focus { border-color: var(--accent); background: var(--surface); }
+
+/* Tags */
+.tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.tag {
+  padding: 3px 10px; border-radius: 5px; font-size: 11px; font-weight: 600;
+  background: var(--accentBg); color: var(--accent); border: 1px solid rgba(44,95,224,0.15);
+}
+.tag.skill { background: var(--purpleBg); color: var(--purple); border-color: rgba(124,58,237,0.15); }
+.tag.role { background: var(--greenBg); color: var(--green); border-color: rgba(26,135,84,0.15); }
+
+/* Buttons */
+.btn {
+  padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text2);
+  cursor: pointer; font-family: inherit; transition: all 0.15s;
+}
+.btn:hover { border-color: var(--border2); color: var(--text); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary:hover { background: var(--accent2); }
+.btn.primary:disabled { opacity: 0.4; cursor: default; }
+.btn-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+/* Loader */
+.loader { text-align: center; padding: 40px; }
+.spinner { width: 24px; height: 24px; border: 2.5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader p { margin-top: 12px; font-size: 13px; color: var(--text2); }
+
+/* Results */
+.result-stat { display: flex; align-items: baseline; gap: 6px; margin-bottom: 4px; }
+.result-stat .val { font-size: 20px; font-weight: 600; font-family: var(--serif); }
+.result-stat .label { font-size: 12px; color: var(--text2); }
+
+/* Section visibility */
+.section { display: none; }
+.section.visible { display: block; }
+
+/* Footer */
+.footer { text-align: center; margin-top: 32px; font-size: 11px; color: var(--text3); }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="13" fill="#2C5FE0"/><circle cx="14" cy="14" r="5" fill="#fff"/><circle cx="14" cy="5.5" r="2.5" fill="#fff"/><circle cx="21.4" cy="18" r="2.5" fill="#fff"/><circle cx="6.6" cy="18" r="2.5" fill="#fff"/></svg>
+      <span class="logo-text">Pollen</span>
+    </div>
+    <h1>Land your next role, automatically</h1>
+    <p>Upload your resume. Pollen finds matching jobs, tailors your application, and applies for you.</p>
+  </div>
+
+  <!-- Progress -->
+  <div class="steps">
+    <div class="step-dot active" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+    <div class="step-dot" id="dot3"></div>
+  </div>
+
+  <!-- Step 1: Upload -->
+  <div class="section visible" id="step1">
+    <div class="card">
+      <div class="card-title"><span class="num">1</span> Upload your resume</div>
+      <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()"
+           ondragover="event.preventDefault(); this.classList.add('dragover')"
+           ondragleave="this.classList.remove('dragover')"
+           ondrop="event.preventDefault(); this.classList.remove('dragover'); handleFile(event.dataTransfer.files[0])">
+        <svg width="32" height="32" fill="none" stroke="#9B9B95" stroke-width="1.5">
+          <path d="M16 4v16M10 10l6-6 6 6M4 22v4a2 2 0 002 2h20a2 2 0 002-2v-4"/>
+        </svg>
+        <p>Drop your resume here, or click to browse</p>
+        <p style="font-size:11px; color:var(--text3); margin-top:4px">PDF, DOCX, or TXT</p>
+        <input type="file" id="fileInput" accept=".pdf,.docx,.doc,.txt,.md" onchange="handleFile(this.files[0])">
+        <div class="filename" id="fileName"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary" id="analyzeBtn" onclick="analyzeResume()" disabled>Analyze resume</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="section" id="loading">
+    <div class="loader">
+      <div class="spinner"></div>
+      <p id="loadingText">Reading your resume...</p>
+    </div>
+  </div>
+
+  <!-- Step 2: Review Profile -->
+  <div class="section" id="step2">
+    <div class="card">
+      <div class="card-title"><span class="num">2</span> Your profile</div>
+      <div class="field-grid">
+        <div class="field"><label>First name</label><input id="pFirstName"></div>
+        <div class="field"><label>Last name</label><input id="pLastName"></div>
+        <div class="field"><label>Email</label><input id="pEmail" type="email"></div>
+        <div class="field"><label>Phone</label><input id="pPhone"></div>
+        <div class="field"><label>Location</label><input id="pLocation"></div>
+        <div class="field"><label>LinkedIn</label><input id="pLinkedin"></div>
+        <div class="field"><label>Current title</label><input id="pTitle"></div>
+        <div class="field"><label>Current company</label><input id="pCompany"></div>
+        <div class="field"><label>Years experience</label><input id="pYears" type="number"></div>
+        <div class="field"><label>Education</label><input id="pEducation"></div>
+        <div class="field"><label>School</label><input id="pSchool"></div>
+        <div class="field"><label>Degree</label><input id="pDegree"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Detected role</div>
+      <div class="result-stat"><span class="val" id="rCategory">—</span><span class="label">role category</span></div>
+      <div class="result-stat"><span class="val" id="rLevel">—</span><span class="label">seniority level</span></div>
+      <div style="margin-top:12px">
+        <label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)">Target roles</label>
+        <div class="tag-list" id="targetRoles"></div>
+      </div>
+      <div style="margin-top:12px">
+        <label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)">Key skills</label>
+        <div class="tag-list" id="keySkills"></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="goStep(1)">Back</button>
+      <button class="btn primary" onclick="saveAndProceed()">Save & find jobs</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Dashboard -->
+  <div class="section" id="step3">
+    <div class="card">
+      <div class="card-title"><span class="num">3</span> Your job matches</div>
+      <div id="matchResults">
+        <div class="loader">
+          <div class="spinner"></div>
+          <p>Scoring jobs against your profile...</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="jobStats" style="display:none">
+      <div class="card">
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; text-align:center;">
+          <div><div class="result-stat" style="justify-content:center"><span class="val" id="sTotal">0</span></div><div class="label" style="font-size:11px;color:var(--text3)">Total jobs</div></div>
+          <div><div class="result-stat" style="justify-content:center"><span class="val" id="sMatched" style="color:var(--green)">0</span></div><div class="label" style="font-size:11px;color:var(--text3)">Strong matches</div></div>
+          <div><div class="result-stat" style="justify-content:center"><span class="val" id="sRemote" style="color:var(--accent)">0</span></div><div class="label" style="font-size:11px;color:var(--text3)">Remote</div></div>
+        </div>
+      </div>
+
+      <div class="btn-row" style="flex-direction:column; align-items:stretch; gap:8px;">
+        <a class="btn primary" href="/" style="text-align:center">Open dashboard →</a>
+        <button class="btn" onclick="scoreJobs()" id="scoreBtn">Re-score all jobs</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">Pollen — AI-powered job search automation</div>
+</div>
+
+<script>
+const API = window.location.origin;
+let uploadedFile = null;
+let profileData = null;
+
+function handleFile(file) {
+  if (!file) return;
+  uploadedFile = file;
+  const zone = document.getElementById('dropZone');
+  zone.classList.add('uploaded');
+  document.getElementById('fileName').textContent = '✓ ' + file.name;
+  document.getElementById('analyzeBtn').disabled = false;
+}
+
+async function analyzeResume() {
+  if (!uploadedFile) return;
+  goStep('loading');
+  document.getElementById('loadingText').textContent = 'Analyzing your resume with AI...';
+
+  const form = new FormData();
+  form.append('resume', uploadedFile);
+
+  try {
+    const r = await fetch(`${API}/api/onboard`, { method: 'POST', body: form });
+    const data = await r.json();
+
+    if (data.error) {
+      alert('Error: ' + data.error);
+      goStep(1);
+      return;
+    }
+
+    profileData = data.profile;
+    populateProfile(data.profile);
+    populateDetection(data.profile, data.search_config);
+    goStep(2);
+
+  } catch (e) {
+    alert('Error connecting to API: ' + e.message);
+    goStep(1);
+  }
+}
+
+function populateProfile(p) {
+  document.getElementById('pFirstName').value = p.first_name || '';
+  document.getElementById('pLastName').value = p.last_name || '';
+  document.getElementById('pEmail').value = p.email || '';
+  document.getElementById('pPhone').value = p.phone || '';
+  document.getElementById('pLocation').value = p.location || '';
+  document.getElementById('pLinkedin').value = p.linkedin || '';
+  document.getElementById('pTitle').value = p.current_title || '';
+  document.getElementById('pCompany').value = p.current_company || '';
+  document.getElementById('pYears').value = p.years_experience || '';
+  document.getElementById('pEducation').value = p.education_level || '';
+  document.getElementById('pSchool').value = p.school || '';
+  document.getElementById('pDegree').value = p.degree || '';
+}
+
+function populateDetection(p, sc) {
+  document.getElementById('rCategory').textContent = (p.role_category || 'unknown').replace('_', ' ');
+  document.getElementById('rLevel').textContent = p.seniority_level || 'unknown';
+
+  const rolesEl = document.getElementById('targetRoles');
+  rolesEl.innerHTML = (p.target_roles || []).map(r => `<span class="tag role">${r}</span>`).join('');
+
+  const skillsEl = document.getElementById('keySkills');
+  skillsEl.innerHTML = (p.key_skills || []).slice(0, 12).map(s => `<span class="tag skill">${s}</span>`).join('');
+}
+
+async function saveAndProceed() {
+  // Update profileData from form
+  profileData.first_name = document.getElementById('pFirstName').value;
+  profileData.last_name = document.getElementById('pLastName').value;
+  profileData.email = document.getElementById('pEmail').value;
+  profileData.phone = document.getElementById('pPhone').value;
+  profileData.location = document.getElementById('pLocation').value;
+  profileData.linkedin = document.getElementById('pLinkedin').value;
+  profileData.current_title = document.getElementById('pTitle').value;
+  profileData.current_company = document.getElementById('pCompany').value;
+  profileData.years_experience = document.getElementById('pYears').value;
+  profileData.education_level = document.getElementById('pEducation').value;
+  profileData.school = document.getElementById('pSchool').value;
+  profileData.degree = document.getElementById('pDegree').value;
+
+  goStep(3);
+  await scoreJobs();
+}
+
+async function scoreJobs() {
+  document.getElementById('matchResults').innerHTML = '<div class="loader"><div class="spinner"></div><p>Scoring jobs against your profile...</p></div>';
+  document.getElementById('jobStats').style.display = 'none';
+
+  try {
+    // Score all jobs
+    const sr = await fetch(`${API}/api/score-all`, { method: 'POST' });
+    const scored = await sr.json();
+
+    // Get stats
+    const jr = await fetch(`${API}/api/jobs?limit=1`);
+    const jd = await jr.json();
+
+    // Get ranked jobs
+    const rr = await fetch(`${API}/api/jobs/ranked?min_score=40&limit=200`);
+    const rd = await rr.json();
+
+    document.getElementById('sTotal').textContent = jd.total || 0;
+    document.getElementById('sMatched').textContent = rd.total || 0;
+
+    // Count remote
+    let remote = 0;
+    if (rd.jobs) rd.jobs.forEach(j => { if (j.remote) remote++; });
+    document.getElementById('sRemote').textContent = remote;
+
+    document.getElementById('matchResults').innerHTML = `
+      <p style="font-size:13px;color:var(--green);font-weight:600">✓ Scored ${scored.scored || 0} jobs</p>
+      <p style="font-size:12px;color:var(--text2);margin-top:4px">${rd.total || 0} strong matches found (score 40+)</p>
+    `;
+    document.getElementById('jobStats').style.display = 'block';
+
+  } catch (e) {
+    document.getElementById('matchResults').innerHTML = `<p style="color:var(--red)">Error: ${e.message}</p>`;
+  }
+}
+
+function goStep(n) {
+  ['step1', 'step2', 'step3', 'loading'].forEach(id => document.getElementById(id).classList.remove('visible'));
+  if (n === 'loading') {
+    document.getElementById('loading').classList.add('visible');
+    return;
+  }
+  document.getElementById('step' + n).classList.add('visible');
+
+  // Update dots
+  for (let i = 1; i <= 3; i++) {
+    const dot = document.getElementById('dot' + i);
+    dot.classList.remove('active', 'done');
+    if (i < n) dot.classList.add('done');
+    else if (i === n) dot.classList.add('active');
+  }
+}
+</script>
+</body>
+</html>
