@@ -28,3 +28,4 @@ python-dotenv>=1.0.0
 thefuzz[speedup]>=0.22.0  # fuzzy string matching for dedup
 rich>=13.7.0               # pretty logging
 tenacity>=8.2.0            # retry logic
+python-multipart>=0.0.6
