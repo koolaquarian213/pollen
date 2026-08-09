@@ -6,12 +6,17 @@ Usage:
 """
 
 import os
+import shutil
 from pathlib import Path
 
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+
+# Seed database if missing
+if not Path("jobs.db").exists() and Path("jobs_seed.db").exists():
+    shutil.copy("jobs_seed.db", "jobs.db")
 
 # Import the existing API app
 from api.server import app
