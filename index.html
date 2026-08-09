@@ -417,7 +417,7 @@ table.src tr:last-child td { border-bottom: none; }
 </div>
 
 <script>
-const API = 'http://localhost:8000';
+const API = window.location.origin;
 let allJobs=[], filtered=[], selectedId=null, resumeText='', matchScores={}, visaMap={};
 let currentTab='search', debounceTimer=null;
 const filters = { remote:false, visa:false, pay:false, source:'', level:'' };
